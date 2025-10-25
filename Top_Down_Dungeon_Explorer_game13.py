@@ -2314,7 +2314,9 @@ def draw_intro_screen():
         start_game()
 
 def draw_chateau_destruction_animation():
-    global chateau_image_current_state, chateau_rect_final_pos, castle_deforming_active, castle_deformation_start_time, debris_particles, game_quit_timer, game_running_flag
+    #global chateau_image_current_state, chateau_rect_final_pos, castle_deforming_active, castle_deformation_start_time, debris_particles, game_quit_timer, game_running_flag
+    global chateau_image_current_original, chateau_rect_final_pos, castle_deforming_active, castle_deformation_start_time, debris_particles, game_quit_timer, game_running_flag
+
 
     if chateau_image_original is None:
         try:
