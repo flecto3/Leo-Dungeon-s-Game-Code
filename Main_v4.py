@@ -5,6 +5,7 @@ import socket
 import threading
 import pickle
 import sys
+import os
 from enum import Enum
 from dataclasses import dataclass
 from typing import List, Tuple, Optional
@@ -34,12 +35,16 @@ PORT = 5050
 BUFFER_SIZE = 8192
 
 # Display Configuration
-SCREEN_WIDTH = 1600
+SCREEN_WIDTH = 1700
 SCREEN_HEIGHT = 900
 FPS = 60
 TILE_SIZE = 40
 INFO_BAR_HEIGHT = 100
 MAZE_GAP = 20
+
+# Music Configuration
+MUSIC_VOLUME = 0.5  # Volume level (0.0 to 1.0)
+ASSETS_FOLDER = "assets"  # Folder containing music files
 
 # Game Configuration
 PLAYER_SPEED = 4
@@ -60,7 +65,7 @@ GOLD_VALUE = 25
 HEALTH_POTION_HEAL = 20
 WALL_HEALTH = 40
 
-# Colors
+# Enhanced Colors
 COLORS = {
     'black': (0, 0, 0),
     'white': (255, 255, 255),
@@ -80,6 +85,16 @@ COLORS = {
     'breakable_wall': (120, 120, 120),
     'health_bar': (255, 0, 0),
     'health_bar_bg': (50, 50, 50),
+    # New UI colors
+    'ui_bg': (20, 20, 35),
+    'ui_panel': (35, 35, 55),
+    'ui_border': (70, 70, 100),
+    'ui_accent': (100, 150, 255),
+    'ui_hover': (120, 170, 255),
+    'ui_text': (230, 230, 240),
+    'ui_text_dim': (150, 150, 160),
+    'gradient_top': (25, 25, 45),
+    'gradient_bottom': (15, 15, 25),
 }
 
 # ============================================================================
@@ -150,7 +165,678 @@ LEVELS = [
         "#.................L#",
         "####################"
     ],
+    # Level 4 - The Fortress
+    [
+        "####################",
+        "#P.................#",
+        "#.###############.##",
+        "#.#.............#..#",
+        "#.#.###########.#.##",
+        "#.#.#.........#.#..#",
+        "#.#.#.#######.#.#.##",
+        "#.#.#.#.E.G.#.#.#..#",
+        "#.#.#.#.###.#.#.#.##",
+        "#.#.#.#.#K#.#.#.#..#",
+        "#.#.#.#.###.#.#.#.##",
+        "#.#.#.#.....#.#.#..#",
+        "#.#.#.#######.#.#.##",
+        "#.#.#.........#.#..#",
+        "#.#.###########.#.##",
+        "#.#.E.........E.#..#",
+        "#.#.............#.L#",
+        "####################"
+    ],
+    # Level 5 - Crossroads
+    [
+        "####################",
+        "#P........#........#",
+        "#.######..#..######.#",
+        "#.#....#..#..#....#.#",
+        "#.#.##.#..#..#.##.#.#",
+        "#.#.##.#.....#.##.#.#",
+        "#.#....#######....#.#",
+        "#.######..E..######.#",
+        "#........###........#",
+        "#.######.###.######.#",
+        "#.#....#.###.#....#.#",
+        "#.#.##.#.....#.##.#.#",
+        "#.#.##.#.#K#.#.##.#.#",
+        "#.#....#.#G#.#....#.#",
+        "#.######.#H#.######.#",
+        "#........###.......E#",
+        "#..................L#",
+        "####################"
+    ],
+    # Level 6 - The Gauntlet
+    [
+        "####################",
+        "#P.E...............#",
+        "#.################.#",
+        "#................#.#",
+        "#################..#",
+        "#.E...............##",
+        "#.################.#",
+        "#................#.#",
+        "#################..#",
+        "#.E...........G...##",
+        "#.################.#",
+        "#........H.......#.#",
+        "#################..#",
+        "#.E.............K.##",
+        "#.################.#",
+        "#................#.#",
+        "#.E..............#L#",
+        "####################"
+    ],
+    # Level 7 - Treasure Chamber
+    [
+        "####################",
+        "#P.................#",
+        "#.#####.###.#####.##",
+        "#.#...#.#.#.#...#..#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#...G.G...#.#..#",
+        "#.#.###########.#.##",
+        "#.#.............#..#",
+        "#.###.#######.###.##",
+        "#...#.#.E.E.#.#...##",
+        "###.#.#.###.#.#.####",
+        "#...#.#.GKH.#.#....#",
+        "#.###.#.###.#.###.##",
+        "#.#...#.....#...#..#",
+        "#.#.###########.#.##",
+        "#.#.............#..#",
+        "#.#.............#.L#",
+        "####################"
+    ],
+    # Level 8 - Spiral Descent
+    [
+        "####################",
+        "#P#################",
+        "#.................##",
+        "##.#############..##",
+        "##.#...........#..##",
+        "##.#.#########.#..##",
+        "##.#.#.......#.#..##",
+        "##.#.#.#####.#.#..##",
+        "##.#.#.#EGK#.#.#..##",
+        "##.#.#.#####.#.#..##",
+        "##.#.#.......#.#..##",
+        "##.#.#########.#..##",
+        "##.#...........#..##",
+        "##.#############.E##",
+        "##................##",
+        "##.#################",
+        "##................L#",
+        "####################"
+    ],
+    # Level 9 - The Arena
+    [
+        "####################",
+        "#P.................#",
+        "#.################.#",
+        "#.#..............#.#",
+        "#.#.############.#.#",
+        "#.#.#..........#.#.#",
+        "#.#.#.########.#.#.#",
+        "#.#.#.#......#.#.#.#",
+        "#.#.#.#.EEEE.#.#.#.#",
+        "#.#.#.#.GKHG.#.#.#.#",
+        "#.#.#.#......#.#.#.#",
+        "#.#.#.########.#.#.#",
+        "#.#.#..........#.#.#",
+        "#.#.############.#.#",
+        "#.#..............#.#",
+        "#.################.#",
+        "#.................L#",
+        "####################"
+    ],
+    # Level 10 - Winding Paths
+    [
+        "####################",
+        "#P#..........#.....#",
+        "#.#.########.#.###.#",
+        "#.#.#......#.#.#...#",
+        "#.#.#.####.#.#.#.###",
+        "#.#.#.#..#.#.#.#...#",
+        "#.#.#.#..#.#.#.###.#",
+        "#.#...#..#.#.#...#.#",
+        "#.#####..#.#.###.#.#",
+        "#.E......#.#...#.#.#",
+        "#.#######.###.##.#.#",
+        "#.........G.#....#.#",
+        "###########.######.#",
+        "#...........E......#",
+        "#.#################",
+        "#.K...............H#",
+        "#..................L#",
+        "####################"
+    ],
+    # Level 11 - Chamber Complex
+    [
+        "####################",
+        "#P...#.....#.......#",
+        "#.##.#.###.#.###.##.#",
+        "#.##.#.#...#.#...##.#",
+        "#....#.#.###.#.#....#",
+        "####.#.#.....#.#.####",
+        "#....#.###E###.#....#",
+        "#.####.........####.#",
+        "#.#..............#..#",
+        "#.#.####.#.####.##.##",
+        "#.#.#....#....#....##",
+        "#.#.#.########.####.#",
+        "#.#.#.#......#.#....#",
+        "#...#.#.GKHG.#.#....#",
+        "#####.#......#.#.####",
+        "#.....########.....E#",
+        "#..................L#",
+        "####################"
+    ],
+    # Level 12 - Double Spiral
+    [
+        "####################",
+        "#P.......##........#",
+        "#.#####..##..#####.#",
+        "#.#...#..##..#...#.#",
+        "#.#.#.#..##..#.#.#.#",
+        "#.#.#.#......#.#.#.#",
+        "#.#.#.########.#.#.#",
+        "#.#.#..........#.#.#",
+        "#.#.#.#EEGKHE#.#.#.#",
+        "#.#.#..........#.#.#",
+        "#.#.#.########.#.#.#",
+        "#.#.#.#......#.#.#.#",
+        "#.#.#.#..##..#.#.#.#",
+        "#.#...#..##..#...#.#",
+        "#.#####..##..#####.#",
+        "#........##........#",
+        "#..................L#",
+        "####################"
+    ],
+    # Level 13 - Checkered Chaos
+    [
+        "####################",
+        "#P.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#EEGKHE#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#E#",
+        "#..................L#",
+        "####################"
+    ],
+    # Level 14 - The Labyrinth
+    [
+        "####################",
+        "#P.#...#.......#...#",
+        "#.###.###.###.###.##",
+        "#.....#.....#.....##",
+        "#####.#.###.#.#####",
+        "#.....#.#...#.....##",
+        "#.#####.#.#######.##",
+        "#.#.....#.......#.##",
+        "#.#.###########.#.##",
+        "#.#.#.........#.#.##",
+        "#.#.#.#######.#.#.##",
+        "#.#.#.#EGKHE#.#.#.##",
+        "#.#.#.#######.#.#.##",
+        "#.#.#.........#.#.##",
+        "#.#.###########.#.##",
+        "#.#.............#E.#",
+        "#.#.............#.L#",
+        "####################"
+    ],
+    # Level 15 - Fortress Interior
+    [
+        "####################",
+        "#P################.#",
+        "#.................##",
+        "#.################.#",
+        "##................##",
+        "#.################.#",
+        "##................##",
+        "#.################.#",
+        "##...E.........E..##",
+        "#.################.#",
+        "##.....GKHG.......##",
+        "#.################.#",
+        "##................##",
+        "#.################.#",
+        "##................##",
+        "#.#############E##.#",
+        "##................L#",
+        "####################"
+    ],
+    # Level 16 - The Quad
+    [
+        "####################",
+        "#P.......##........#",
+        "#.######.##.######.#",
+        "#.#....#.##.#....#.#",
+        "#.#.##.#.##.#.##.#.#",
+        "#.#.##.#.##.#.##.#.#",
+        "#.#....#.##.#....#.#",
+        "#.######.##.######.#",
+        "#.E......##......E.#",
+        "#.######.##.######.#",
+        "#.#....#.##.#....#.#",
+        "#.#.##G#.##.#HK#.#.#",
+        "#.#.##.#.##.#.##.#.#",
+        "#.#....#.##.#....#.#",
+        "#.######.##.######.#",
+        "#........##........#",
+        "#..................L#",
+        "####################"
+    ],
+    # Level 17 - Snake Path
+    [
+        "####################",
+        "#P#################",
+        "#.................##",
+        "##.#################",
+        "##.................#",
+        "#################.##",
+        "#.................##",
+        "##.#################",
+        "##.E...............#",
+        "#################.##",
+        "#.................##",
+        "##.#################",
+        "##......GKHE.......#",
+        "#################.##",
+        "#.................##",
+        "##.#################",
+        "##................L#",
+        "####################"
+    ],
+    # Level 18 - Prison Blocks
+    [
+        "####################",
+        "#P...#....#....#...#",
+        "#.##.#.##.#.##.#.##.#",
+        "#.##.#.##.#.##.#.##.#",
+        "#....#....#....#....#",
+        "#.##.#.##.#.##.#.##.#",
+        "#.##.#.##.#.##.#.##.#",
+        "#....#....#....#....#",
+        "#.##E#.##.#.##.#E##.#",
+        "#.##.#.##.#.##.#.##.#",
+        "#....#....#....#....#",
+        "#.##.#.##G#K##H#.##.#",
+        "#.##.#.##.#.##.#.##.#",
+        "#....#....#....#....#",
+        "#.##.#.##.#.##.#.##.#",
+        "#.##.#.##.#.##.#.##.#",
+        "#....#....#....#...L#",
+        "####################"
+    ],
+    # Level 19 - Central Fortress
+    [
+        "####################",
+        "#P.................#",
+        "#.################.#",
+        "#.#..............#.#",
+        "#.#.############.#.#",
+        "#.#.#..........#.#.#",
+        "#.#.#.########.#.#.#",
+        "#.#.#.#......#.#.#.#",
+        "#.#.#.#.####.#.#.#.#",
+        "#.#.#.#.#EE#.#.#.#.#",
+        "#.#.#.#.#GK#.#.#.#.#",
+        "#.#.#.#.#HE#.#.#.#.#",
+        "#.#.#.#.####.#.#.#.#",
+        "#.#.#.#......#.#.#.#",
+        "#.#.#.########.#.#.#",
+        "#.#.#..........#.#.#",
+        "#.#.############.#L#",
+        "####################"
+    ],
+    # Level 20 - Diagonal Challenge
+    [
+        "####################",
+        "#P.................#",
+        "##.###############.#",
+        "##...............#.#",
+        "###.#############.##",
+        "###.............#.##",
+        "####.###########.###",
+        "####...........#.###",
+        "#####.#########.####",
+        "#####.E.......#.####",
+        "######.#######.#####",
+        "######.#.....#.#####",
+        "#######.#.###.######",
+        "#######.#.#G#.######",
+        "########.#.#K#######",
+        "########.#.#H#######",
+        "#########.#.#......L",
+        "####################"
+    ],
+    # Level 21 - The Grid
+    [
+        "####################",
+        "#P.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.................##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.E...............##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#G#K#H#.#.#.##",
+        "#.................##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#E##",
+        "#..................L#",
+        "####################"
+    ],
+    # Level 22 - Double Helix
+    [
+        "####################",
+        "#P##..........##...#",
+        "#.##.########.##.#.#",
+        "#.##.#......#.##.#.#",
+        "#....#.####.#....#.#",
+        "####.#.#..#.#.####.#",
+        "#....#.#..#.#....#.#",
+        "#.####.####.####.#.#",
+        "#.#..........E.#.#.#",
+        "#.#.##########.#.#.#",
+        "#.#.#........#.#.#.#",
+        "#.#.#.######.#.#.#.#",
+        "#.#.#.#GKHE#.#.#.#.#",
+        "#.#.#.######.#.#.#.#",
+        "#.#.#........#.#.#.#",
+        "#.#.##########.#.#.#",
+        "#.#..............#L#",
+        "####################"
+    ],
+    # Level 23 - The Crosshatch
+    [
+        "####################",
+        "#P#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#E#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#G#K#H#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#E#",
+        "##.................L#",
+        "####################"
+    ],
+    # Level 24 - The Catacombs
+    [
+        "####################",
+        "#P###.###.###.###.##",
+        "#....#...#...#....##",
+        "#.####.#.#.#.####.##",
+        "#.#....#.#.#....#.##",
+        "#.#.####.#.####.#.##",
+        "#.#.#....#....#.#.##",
+        "#.#.#.#######.#.#.##",
+        "#.#.#.#.....#.#.#.##",
+        "#.#.#.#.###.#.#.#.##",
+        "#.#.#.#.#E#.#.#.#.##",
+        "#.#.#.#.###.#.#.#.##",
+        "#.#.#.#.....#.#.#.##",
+        "#.#.#.#######.#.#.##",
+        "#.#.#GKHE.....#.#.##",
+        "#.#.##########.#.#.##",
+        "#.#............#...L",
+        "####################"
+    ],
+    # Level 25 - Ultimate Maze
+    [
+        "####################",
+        "#P#.#.#.#.#.#.#.#..#",
+        "#.#.#.#.#.#.#.#.##.#",
+        "#.#.#.#.#.#.#.#..#.#",
+        "#.#.#.#.#.#.#.##.#.#",
+        "#.#.#.#.#.#.#..#.#.#",
+        "#.#.#.#.#.#.##.#.#.#",
+        "#.#.#.#.#.#..#.#.#.#",
+        "#.#.#.#.#.##.#.#.#.#",
+        "#.#.#.#E#..#.#.#.#.#",
+        "#.#.#.#.##.#.#.#.#.#",
+        "#.#.#.#..#.#.#.#.#.#",
+        "#.#.#.##.#.#.#.#.#.#",
+        "#.#.#GKHE#.#.#.#.#.#",
+        "#.#.####.#.#.#.#.#.#",
+        "#.#......#.#.#.#.#E#",
+        "#.########.#.#.#...L",
+        "####################"
+    ],
+    # Level 26 - Boss Arena
+    [
+        "####################",
+        "#P.................#",
+        "#.################.#",
+        "#.#..............#.#",
+        "#.#..............#.#",
+        "#.#..............#.#",
+        "#.#..............#.#",
+        "#.#..............#.#",
+        "#.#......EEE.....#.#",
+        "#.#......EEE.....#.#",
+        "#.#......EEE.....#.#",
+        "#.#..............#.#",
+        "#.#.....GKHG.....#.#",
+        "#.#..............#.#",
+        "#.#..............#.#",
+        "#.#..............#.#",
+        "#.################L#",
+        "####################"
+    ],
+    # Level 27 - The Gauntlet Run
+    [
+        "####################",
+        "#P#################",
+        "#E................##",
+        "###.##############.#",
+        "###E..............##",
+        "#####.############.#",
+        "#####E............##",
+        "#######.##########.#",
+        "#######E..........##",
+        "#########.########.#",
+        "#########E........##",
+        "###########.######.#",
+        "###########.#GKHE#.#",
+        "###########.######.#",
+        "###########E......##",
+        "#############.####.#",
+        "#############E....L#",
+        "####################"
+    ],
+    # Level 28 - Crystal Cavern
+    [
+        "####################",
+        "#P....B.......B....#",
+        "#.####.#.###.#.####.#",
+        "#.#....#.#.#.#....#.#",
+        "#.#.##.#.#.#.#.##.#.#",
+        "#.#.##B#.....#B##.#.#",
+        "#.#....#######....#.#",
+        "#.######.E.E.######.#",
+        "#.B......###......B.#",
+        "#.######.###.######.#",
+        "#.#....#.###.#....#.#",
+        "#.#.##B#.....#B##.#.#",
+        "#.#.##.#GKHE#.##.#.#",
+        "#.#....#.#.#.#....#.#",
+        "#.######.###.######.#",
+        "#.B......###......B.#",
+        "#..................L#",
+        "####################"
+    ],
+    # Level 29 - The Ziggurat
+    [
+        "####################",
+        "#P................E#",
+        "##.###############.#",
+        "##.#.............#.#",
+        "###.#.###########.##",
+        "###.#.#.........#.##",
+        "####.#.#.#######.###",
+        "####.#.#.#.....#.###",
+        "#####.#.#.#.###.####",
+        "#####.#.#.#E#G#.####",
+        "######.#.#.#K#.#####",
+        "######.#.#.#H#.#####",
+        "#######.#.#.#.######",
+        "#######.#.#.#.######",
+        "########.#.#.#######",
+        "########.#.#.#######",
+        "#########.#.......L#",
+        "####################"
+    ],
+    # Level 30 - Final Challenge
+    [
+        "####################",
+        "#P#.#.#.#.#.#.#.#.##",
+        "#.#E#.#.#.#.#.#E#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#E#.#.#.#.#.#E#.##",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#.#",
+        "##.#E#.#.#.#.#E#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#G#K#H#.#.#.##",
+        "##.#E#.#.#.#.#E#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "#.#E#.#.#.#.#.#E#.##",
+        "##.#.#.#.#.#.#.#.#E#",
+        "##.................L#",
+        "####################"
+    ],
 ]
+
+# ============================================================================
+# UI HELPER FUNCTIONS
+# ============================================================================
+
+def draw_gradient_rect(surface, rect, color_top, color_bottom):
+    """Draw a vertical gradient rectangle"""
+    for y in range(rect.height):
+        ratio = y / rect.height
+        color = tuple(int(color_top[i] + (color_bottom[i] - color_top[i]) * ratio) for i in range(3))
+        pygame.draw.line(surface, color, (rect.x, rect.y + y), (rect.x + rect.width, rect.y + y))
+
+def draw_rounded_rect(surface, rect, color, radius=10, border_color=None, border_width=0):
+    """Draw a rounded rectangle"""
+    rect = pygame.Rect(rect)
+    
+    # Draw main rectangle
+    pygame.draw.rect(surface, color, rect.inflate(-radius*2, 0))
+    pygame.draw.rect(surface, color, rect.inflate(0, -radius*2))
+    
+    # Draw circles at corners
+    pygame.draw.circle(surface, color, (rect.left + radius, rect.top + radius), radius)
+    pygame.draw.circle(surface, color, (rect.right - radius, rect.top + radius), radius)
+    pygame.draw.circle(surface, color, (rect.left + radius, rect.bottom - radius), radius)
+    pygame.draw.circle(surface, color, (rect.right - radius, rect.bottom - radius), radius)
+    
+    # Draw border if specified
+    if border_color and border_width > 0:
+        # Top and bottom
+        pygame.draw.line(surface, border_color, (rect.left + radius, rect.top), 
+                        (rect.right - radius, rect.top), border_width)
+        pygame.draw.line(surface, border_color, (rect.left + radius, rect.bottom), 
+                        (rect.right - radius, rect.bottom), border_width)
+        # Left and right
+        pygame.draw.line(surface, border_color, (rect.left, rect.top + radius), 
+                        (rect.left, rect.bottom - radius), border_width)
+        pygame.draw.line(surface, border_color, (rect.right, rect.top + radius), 
+                        (rect.right, rect.bottom - radius), border_width)
+        # Corners
+        pygame.draw.circle(surface, border_color, (rect.left + radius, rect.top + radius), 
+                          radius, border_width)
+        pygame.draw.circle(surface, border_color, (rect.right - radius, rect.top + radius), 
+                          radius, border_width)
+        pygame.draw.circle(surface, border_color, (rect.left + radius, rect.bottom - radius), 
+                          radius, border_width)
+        pygame.draw.circle(surface, border_color, (rect.right - radius, rect.bottom - radius), 
+                          radius, border_width)
+
+def draw_button(surface, rect, text, font, hover=False, icon=None):
+    """Draw a modern button with hover effect"""
+    color = COLORS['ui_hover'] if hover else COLORS['ui_accent']
+    shadow_offset = 4
+    
+    # Shadow
+    shadow_rect = rect.copy()
+    shadow_rect.y += shadow_offset
+    draw_rounded_rect(surface, shadow_rect, (0, 0, 0, 100), radius=8)
+    
+    # Button
+    draw_rounded_rect(surface, rect, color, radius=8, border_color=COLORS['white'], border_width=2)
+    
+    # Icon if provided
+    if icon:
+        icon_surf = font.render(icon, True, COLORS['white'])
+        icon_rect = icon_surf.get_rect(center=(rect.x + 30, rect.centery))
+        surface.blit(icon_surf, icon_rect)
+        text_x_offset = 20
+    else:
+        text_x_offset = 0
+    
+    # Text
+    text_surf = font.render(text, True, COLORS['white'])
+    text_rect = text_surf.get_rect(center=(rect.centerx + text_x_offset, rect.centery))
+    surface.blit(text_surf, text_rect)
+
+def draw_input_field(surface, rect, text, font, active=False, password=False):
+    """Draw a modern input field"""
+    border_color = COLORS['ui_accent'] if active else COLORS['ui_border']
+    
+    # Background
+    draw_rounded_rect(surface, rect, COLORS['ui_panel'], radius=6)
+    
+    # Border with glow effect for active field
+    if active:
+        glow_rect = rect.inflate(6, 6)
+        draw_rounded_rect(surface, glow_rect, (100, 150, 255, 50), radius=8)
+    
+    draw_rounded_rect(surface, rect, COLORS['ui_panel'], radius=6, 
+                     border_color=border_color, border_width=2)
+    
+    # Text
+    display_text = '*' * len(text) if password else text
+    if not text and not active:
+        display_text = ""
+    
+    text_surf = font.render(display_text, True, COLORS['ui_text'])
+    text_rect = text_surf.get_rect(midleft=(rect.x + 15, rect.centery))
+    surface.blit(text_surf, text_rect)
+    
+    # Cursor for active field
+    if active and pygame.time.get_ticks() % 1000 < 500:
+        cursor_x = text_rect.right + 2
+        pygame.draw.line(surface, COLORS['ui_accent'], 
+                        (cursor_x, rect.y + 10), (cursor_x, rect.bottom - 10), 2)
 
 # ============================================================================
 # UTILITY CLASSES
@@ -271,11 +957,9 @@ class Player(Entity):
             if dx != 0 or dy != 0:
                 self.facing = Direction((dx, dy))
         
-        # Try moving
         new_x = self.pos.x + dx * self.speed
         new_y = self.pos.y + dy * self.speed
         
-        # Check collision
         test_rect = pygame.Rect(new_x - self.width // 2, new_y - self.height // 2,
                                self.width, self.height)
         
@@ -299,11 +983,9 @@ class Player(Entity):
         
         self.last_attack_time = now
         
-        # Attack enemies
         for enemy in enemies:
             if self.pos.distance_to(enemy.pos) < PLAYER_ATTACK_RANGE:
                 enemy.take_damage(PLAYER_ATTACK_DAMAGE)
-                # Create hit particles
                 for _ in range(5):
                     angle = random.uniform(0, 2 * math.pi)
                     speed = random.uniform(2, 5)
@@ -313,11 +995,9 @@ class Player(Entity):
                         COLORS['red'], 30, 3
                     ))
         
-        # Attack breakable walls
         for wall in walls:
             if wall.breakable and self.pos.distance_to(wall.pos) < PLAYER_ATTACK_RANGE:
                 if wall.take_damage(PLAYER_ATTACK_DAMAGE):
-                    # Wall destroyed - create particles
                     for _ in range(10):
                         angle = random.uniform(0, 2 * math.pi)
                         speed = random.uniform(2, 6)
@@ -343,15 +1023,12 @@ class Player(Entity):
         center = (int(self.pos.x + offset_x), int(self.pos.y))
         radius = self.width // 2
         
-        # Animate mouth
         if pygame.time.get_ticks() - self.anim_timer > 150:
             self.mouth_open = not self.mouth_open
             self.anim_timer = pygame.time.get_ticks()
         
-        # Draw Pac-Man style
         pygame.draw.circle(surface, self.color, center, radius)
         
-        # Draw mouth
         if self.mouth_open:
             mouth_angle = 30
             facing_angle = 0
@@ -371,7 +1048,6 @@ class Player(Entity):
                 points.append((px, py))
             pygame.draw.polygon(surface, COLORS['black'], points)
         
-        # Draw eye
         eye_offset = radius * 0.3
         eye_angle = 0
         if self.facing == Direction.LEFT:
@@ -418,7 +1094,6 @@ class Enemy(Entity):
         self.next_patrol_time = pygame.time.get_ticks()
     
     def update(self, player: Player, walls: List[Wall]):
-        # Check distance to player
         dist = self.pos.distance_to(player.pos)
         
         if dist < ENEMY_DETECTION_RANGE:
@@ -429,7 +1104,6 @@ class Enemy(Entity):
             self.state = 'patrol'
             self.speed = ENEMY_SPEED_PATROL
             
-            # Update patrol target periodically
             now = pygame.time.get_ticks()
             if now > self.next_patrol_time or \
                self.pos.distance_to(self.patrol_target) < 10:
@@ -440,7 +1114,6 @@ class Enemy(Entity):
                 self.next_patrol_time = now + random.randint(1000, 3000)
             target = self.patrol_target
         
-        # Move towards target
         dx = target.x - self.pos.x
         dy = target.y - self.pos.y
         dist = math.hypot(dx, dy)
@@ -452,7 +1125,6 @@ class Enemy(Entity):
             new_x = self.pos.x + dx
             new_y = self.pos.y + dy
             
-            # Check collision
             test_rect = pygame.Rect(new_x - self.width // 2, new_y - self.height // 2,
                                    self.width, self.height)
             
@@ -467,7 +1139,6 @@ class Enemy(Entity):
                 self.pos.y = new_y
                 self.update_rect()
         
-        # Attack if close enough
         if self.state == 'chase' and dist < ENEMY_ATTACK_RANGE:
             now = pygame.time.get_ticks()
             if now - self.last_attack_time > ENEMY_ATTACK_COOLDOWN:
@@ -483,12 +1154,10 @@ class Enemy(Entity):
         draw_rect = self.rect.copy()
         draw_rect.x += offset_x
         
-        # Draw body
         color = COLORS['red'] if self.state == 'chase' else COLORS['orange']
         pygame.draw.rect(surface, color, draw_rect)
         pygame.draw.rect(surface, COLORS['black'], draw_rect, 2)
         
-        # Draw health bar
         if self.health < self.max_health:
             bar_width = self.width
             bar_height = 4
@@ -526,20 +1195,19 @@ class Collectible(Entity):
     def draw(self, surface: pygame.Surface, offset_x: int = 0):
         center = (int(self.pos.x + offset_x), int(self.pos.y))
         
-        if self.item_type == 'G':  # Gold
+        if self.item_type == 'G':
             pygame.draw.circle(surface, COLORS['gold'], center, self.width // 2)
             pygame.draw.circle(surface, COLORS['black'], center, self.width // 2, 2)
-        elif self.item_type == 'H':  # Health
+        elif self.item_type == 'H':
             size = self.width
             rect = pygame.Rect(center[0] - size // 2, center[1] - size // 2, size, size)
             pygame.draw.rect(surface, COLORS['red'], rect)
-            # Draw cross
             thickness = size // 4
             pygame.draw.rect(surface, COLORS['white'],
                            (center[0] - thickness // 2, rect.top, thickness, size))
             pygame.draw.rect(surface, COLORS['white'],
                            (rect.left, center[1] - thickness // 2, size, thickness))
-        elif self.item_type == 'K':  # Key
+        elif self.item_type == 'K':
             pygame.draw.circle(surface, COLORS['gold'], center, self.width // 3)
             pygame.draw.rect(surface, COLORS['gold'],
                            (center[0], center[1], self.width // 2, self.width // 3))
@@ -598,13 +1266,11 @@ class MazeState:
         if not self.player:
             return
         
-        # Update enemies
         for enemy in self.enemies[:]:
             enemy.update(self.player, self.walls)
             if enemy.health <= 0:
                 self.enemies.remove(enemy)
                 self.player.score += 50
-                # Create death particles
                 for _ in range(15):
                     angle = random.uniform(0, 2 * math.pi)
                     speed = random.uniform(3, 7)
@@ -614,7 +1280,6 @@ class MazeState:
                         COLORS['red'], 50, 4
                     ))
         
-        # Check collectibles
         for collectible in self.collectibles[:]:
             if self.player.rect.colliderect(collectible.rect):
                 if collectible.item_type == 'G':
@@ -625,7 +1290,6 @@ class MazeState:
                     self.player.keys += 1
                 self.collectibles.remove(collectible)
                 
-                # Create pickup particles
                 for _ in range(8):
                     angle = random.uniform(0, 2 * math.pi)
                     speed = random.uniform(2, 5)
@@ -636,20 +1300,15 @@ class MazeState:
                         color, 30, 3
                     ))
         
-        # Remove destroyed walls
         self.walls = [w for w in self.walls if not w.breakable or w.health > 0]
-        
-        # Update particles
         self.particles = [p for p in self.particles if p.update()]
     
     def draw(self, surface: pygame.Surface, offset_x: int = 0):
-        # Draw floor
         maze_width = len(LEVELS[0][0]) * TILE_SIZE
         maze_height = len(LEVELS[0]) * TILE_SIZE
         pygame.draw.rect(surface, COLORS['floor'],
                         (offset_x, 0, maze_width, maze_height))
         
-        # Draw grid lines
         for i in range(len(LEVELS[0][0]) + 1):
             x = i * TILE_SIZE + offset_x
             pygame.draw.line(surface, COLORS['dark_gray'], (x, 0), (x, maze_height))
@@ -658,30 +1317,24 @@ class MazeState:
             pygame.draw.line(surface, COLORS['dark_gray'], (offset_x, y), 
                            (offset_x + maze_width, y))
         
-        # Draw exit
         if self.exit_rect:
             draw_rect = self.exit_rect.copy()
             draw_rect.x += offset_x
             pygame.draw.rect(surface, COLORS['cyan'], draw_rect)
             pygame.draw.rect(surface, COLORS['white'], draw_rect, 3)
         
-        # Draw walls
         for wall in self.walls:
             wall.draw(surface, offset_x)
         
-        # Draw collectibles
         for collectible in self.collectibles:
             collectible.draw(surface, offset_x)
         
-        # Draw enemies
         for enemy in self.enemies:
             enemy.draw(surface, offset_x)
         
-        # Draw player
         if self.player:
             self.player.draw(surface, offset_x)
         
-        # Draw particles
         for particle in self.particles:
             particle.draw(surface, offset_x)
     
@@ -696,11 +1349,9 @@ class MazeState:
         }
     
     def set_state(self, state: dict):
-        # Update player
         if state['player'] and self.player:
             self.player.set_state(state['player'])
         
-        # Update enemies
         while len(self.enemies) < len(state['enemies']):
             self.enemies.append(Enemy(0, 0))
         while len(self.enemies) > len(state['enemies']):
@@ -708,7 +1359,6 @@ class MazeState:
         for enemy, e_state in zip(self.enemies, state['enemies']):
             enemy.set_state(e_state)
         
-        # Update collectibles
         while len(self.collectibles) < len(state['collectibles']):
             self.collectibles.append(Collectible(0, 0, 'G'))
         while len(self.collectibles) > len(state['collectibles']):
@@ -716,7 +1366,6 @@ class MazeState:
         for collectible, c_state in zip(self.collectibles, state['collectibles']):
             collectible.set_state(c_state)
         
-        # Update walls
         self.walls.clear()
         for w_state in state['walls']:
             wall = Wall(w_state['x'] - TILE_SIZE // 2, w_state['y'] - TILE_SIZE // 2,
@@ -731,11 +1380,13 @@ class MazeState:
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()  # Initialize the mixer for music
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Dungeon Explorer Multiplayer")
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, 32)
-        self.large_font = pygame.font.Font(None, 64)
+        self.font = pygame.font.Font(None, 28)
+        self.title_font = pygame.font.Font(None, 72)
+        self.subtitle_font = pygame.font.Font(None, 36)
         
         self.state = GameState.MODE_SELECT
         self.is_server = False
@@ -746,48 +1397,81 @@ class Game:
         self.maze2: Optional[MazeState] = None
         self.current_level = 0
         
-        # Networking
         self.socket: Optional[socket.socket] = None
         self.connection: Optional[socket.socket] = None
         
-        # UI
         self.username = ""
         self.password = ""
         self.active_field = "username"
         self.error_message = ""
         
-        # Input
         self.keys_pressed = set()
+        self.mouse_pos = (0, 0)
+        
+        # Music system
+        self.current_music = None
+        self.music_enabled = True
+        pygame.mixer.music.set_volume(MUSIC_VOLUME)
+    
+    def play_music(self, music_name: str):
+        """Play music from the assets folder"""
+        if not self.music_enabled:
+            return
+        
+        # Check if we're already playing this music
+        if self.current_music == music_name:
+            return
+        
+        try:
+            music_path = os.path.join(ASSETS_FOLDER, music_name)
+            if os.path.exists(music_path):
+                pygame.mixer.music.load("C:/Users/Leoth/AzanLeo_game/Leo-Dungeon-s-Game-Code/assets")
+                pygame.mixer.music.play(-1)  # -1 means loop indefinitely
+                self.current_music = music_name
+                print(f"[MUSIC] Now playing: {music_name}")
+            else:
+                print(f"[MUSIC] Warning: {music_path} not found")
+        except Exception as e:
+            print(f"[MUSIC] Error loading music: {e}")
+    
+    def stop_music(self):
+        """Stop the currently playing music"""
+        try:
+            pygame.mixer.music.stop()
+            self.current_music = None
+        except Exception as e:
+            print(f"[MUSIC] Error stopping music: {e}")
+    
+    def play_login_music(self):
+        """Play the login screen music"""
+        self.play_music("login_music.mp3")
+    
+    def play_level_music(self, level_number: int):
+        """Play music for a specific level"""
+        music_name = f"level_{level_number}_music.mp3"
+        self.play_music(music_name)
     
     def start_server(self):
-        """Start as server"""
         self.is_server = True
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((HOST, PORT))
         self.socket.listen(1)
         print(f"[SERVER] Listening on port {PORT}")
-        
-        # Start listener thread
         threading.Thread(target=self._server_listen, daemon=True).start()
     
     def _server_listen(self):
-        """Server listening thread"""
         try:
             self.connection, addr = self.socket.accept()
             print(f"[SERVER] Client connected from {addr}")
             self.is_connected = True
-            
-            # Start game communication
             threading.Thread(target=self._server_communicate, daemon=True).start()
         except Exception as e:
             print(f"[SERVER] Error: {e}")
     
     def _server_communicate(self):
-        """Server communication thread"""
         while self.running and self.is_connected:
             try:
-                # Send game state
                 if self.maze1 and self.maze2:
                     game_state = {
                         'maze1': self.maze1.get_state(),
@@ -799,7 +1483,6 @@ class Game:
                     self.connection.sendall(len(data).to_bytes(4, 'big'))
                     self.connection.sendall(data)
                 
-                # Receive client input
                 size_data = self.connection.recv(4)
                 if not size_data:
                     break
@@ -822,25 +1505,20 @@ class Game:
                 break
     
     def connect_to_server(self, host: str):
-        """Connect as client"""
         self.is_server = False
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((host, PORT))
             print(f"[CLIENT] Connected to {host}:{PORT}")
             self.is_connected = True
-            
-            # Start communication thread
             threading.Thread(target=self._client_communicate, daemon=True).start()
         except Exception as e:
             print(f"[CLIENT] Connection error: {e}")
             self.error_message = f"Connection failed: {e}"
     
     def _client_communicate(self):
-        """Client communication thread"""
         while self.running and self.is_connected:
             try:
-                # Receive game state
                 size_data = self.socket.recv(4)
                 if not size_data:
                     break
@@ -856,7 +1534,6 @@ class Game:
                     game_state = pickle.loads(data)
                     self._process_server_state(game_state)
                 
-                # Send client input
                 if self.maze2 and self.maze2.player:
                     client_input = {
                         'keys': list(self.keys_pressed),
@@ -873,7 +1550,6 @@ class Game:
                 break
     
     def _process_client_input(self, input_data: dict):
-        """Process input from client (server side)"""
         if not self.maze2 or not self.maze2.player:
             return
         
@@ -896,11 +1572,9 @@ class Game:
             self.maze2.particles.extend(particles)
     
     def _process_server_state(self, state: dict):
-        """Process state from server (client side)"""
         self.current_level = state.get('level', 0)
         self.state = GameState(state.get('state', GameState.PLAYING.value))
         
-        # Update mazes
         if state.get('maze1'):
             if not self.maze1:
                 self.maze1 = MazeState(1, LEVELS[self.current_level])
@@ -912,20 +1586,19 @@ class Game:
             self.maze2.set_state(state['maze2'])
     
     def start_game(self):
-        """Initialize game after login"""
         self.state = GameState.PLAYING
         self.current_level = 0
         self.maze1 = MazeState(1, LEVELS[0])
         self.maze2 = MazeState(2, LEVELS[0])
+        self.play_level_music(1)  # Play level 1 music
     
     def advance_level(self):
-        """Move to next level"""
         self.current_level += 1
         if self.current_level >= len(LEVELS):
             self.state = GameState.GAME_OVER
+            self.stop_music()  # Stop music on game over
             return
         
-        # Preserve player stats
         p1_health = self.maze1.player.health if self.maze1 and self.maze1.player else PLAYER_HEALTH
         p1_score = self.maze1.player.score if self.maze1 and self.maze1.player else 0
         p1_keys = self.maze1.player.keys if self.maze1 and self.maze1.player else 0
@@ -934,11 +1607,9 @@ class Game:
         p2_score = self.maze2.player.score if self.maze2 and self.maze2.player else 0
         p2_keys = self.maze2.player.keys if self.maze2 and self.maze2.player else 0
         
-        # Load new level
         self.maze1 = MazeState(1, LEVELS[self.current_level])
         self.maze2 = MazeState(2, LEVELS[self.current_level])
         
-        # Restore stats
         if self.maze1.player:
             self.maze1.player.health = p1_health
             self.maze1.player.score = p1_score
@@ -950,10 +1621,12 @@ class Game:
             self.maze2.player.keys = p2_keys
         
         self.state = GameState.LEVEL_COMPLETE
-        pygame.time.set_timer(pygame.USEREVENT, 2000, 1)  # Resume after 2s
+        pygame.time.set_timer(pygame.USEREVENT, 2000, 1)
+        
+        # Play music for the next level (current_level is 0-indexed, so add 1)
+        self.play_level_music(self.current_level + 1)
     
     def handle_events(self):
-        """Handle pygame events"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -969,8 +1642,10 @@ class Game:
                     if event.key == pygame.K_1:
                         self.start_server()
                         self.state = GameState.LOGIN
+                        self.play_login_music()
                     elif event.key == pygame.K_2:
                         self.state = GameState.LOGIN
+                        self.play_login_music()
                 
                 elif self.state == GameState.LOGIN:
                     self._handle_login_input(event)
@@ -978,9 +1653,13 @@ class Game:
                 elif self.state == GameState.PLAYING:
                     if event.key == pygame.K_ESCAPE:
                         self.state = GameState.MODE_SELECT
+                        self.stop_music()
             
             elif event.type == pygame.KEYUP:
                 self.keys_pressed.discard(event.key)
+            
+            elif event.type == pygame.MOUSEMOTION:
+                self.mouse_pos = event.pos
             
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.state == GameState.MODE_SELECT:
@@ -989,7 +1668,6 @@ class Game:
                     self._handle_login_click(event.pos)
     
     def _handle_login_input(self, event):
-        """Handle login screen keyboard input"""
         if self.active_field == "username":
             if event.key == pygame.K_RETURN:
                 self.active_field = "password"
@@ -1011,35 +1689,35 @@ class Game:
                 self.password += event.unicode
     
     def _handle_mode_select_click(self, pos):
-        """Handle mode selection clicks"""
-        # Server button
-        if 550 <= pos[0] <= 750 and 350 <= pos[1] <= 420:
+        server_rect = pygame.Rect(450, 350, 250, 80)
+        client_rect = pygame.Rect(900, 350, 250, 80)
+        
+        if server_rect.collidepoint(pos):
             self.start_server()
             self.state = GameState.LOGIN
-        # Client button
-        elif 850 <= pos[0] <= 1050 and 350 <= pos[1] <= 420:
+            self.play_login_music()
+        elif client_rect.collidepoint(pos):
             self.state = GameState.LOGIN
+            self.play_login_music()
     
     def _handle_login_click(self, pos):
-        """Handle login screen clicks"""
-        # Username field
-        if 650 <= pos[0] <= 950 and 350 <= pos[1] <= 390:
+        username_rect = pygame.Rect(550, 320, 500, 50)
+        password_rect = pygame.Rect(550, 420, 500, 50)
+        login_rect = pygame.Rect(650, 530, 300, 60)
+        
+        if username_rect.collidepoint(pos):
             self.active_field = "username"
-        # Password field
-        elif 650 <= pos[0] <= 950 and 450 <= pos[1] <= 490:
+        elif password_rect.collidepoint(pos):
             self.active_field = "password"
-        # Login button
-        elif 700 <= pos[0] <= 900 and 550 <= pos[1] <= 610:
+        elif login_rect.collidepoint(pos):
             self._attempt_login()
     
     def _attempt_login(self):
-        """Attempt to login"""
         if self.username == "user" and self.password == "pass":
             self.error_message = ""
             if self.is_server:
                 self.start_game()
             else:
-                # Connect to server
                 self.connect_to_server("127.0.0.1")
                 if self.is_connected:
                     self.state = GameState.PLAYING
@@ -1047,11 +1725,8 @@ class Game:
             self.error_message = "Invalid credentials"
     
     def update(self):
-        """Update game logic"""
         if self.state == GameState.PLAYING and self.is_server:
-            # Server updates game logic
             if self.maze1:
-                # Handle player 1 movement
                 dx, dy = 0, 0
                 if pygame.K_UP in self.keys_pressed:
                     dy -= 1
@@ -1072,29 +1747,26 @@ class Game:
                 
                 self.maze1.update()
                 
-                # Check level exit
                 if self.maze1.player and self.maze1.exit_rect:
                     if self.maze1.player.rect.colliderect(self.maze1.exit_rect):
                         self.advance_level()
                 
-                # Check game over
                 if self.maze1.player and self.maze1.player.health <= 0:
                     self.state = GameState.GAME_OVER
+                    self.stop_music()
             
             if self.maze2:
                 self.maze2.update()
                 
-                # Check level exit
                 if self.maze2.player and self.maze2.exit_rect:
                     if self.maze2.player.rect.colliderect(self.maze2.exit_rect):
                         self.advance_level()
                 
-                # Check game over
                 if self.maze2.player and self.maze2.player.health <= 0:
                     self.state = GameState.GAME_OVER
+                    self.stop_music()
         
         elif self.state == GameState.PLAYING and not self.is_server:
-            # Client only handles local player input
             if self.maze2 and self.maze2.player:
                 dx, dy = 0, 0
                 if pygame.K_UP in self.keys_pressed:
@@ -1106,12 +1778,10 @@ class Game:
                 if pygame.K_RIGHT in self.keys_pressed:
                     dx += 1
                 
-                # Local prediction
                 self.maze2.player.move(dx, dy, self.maze2.walls)
     
     def draw(self):
-        """Draw everything"""
-        self.screen.fill(COLORS['black'])
+        self.screen.fill(COLORS['ui_bg'])
         
         if self.state == GameState.MODE_SELECT:
             self._draw_mode_select()
@@ -1127,188 +1797,254 @@ class Game:
         pygame.display.flip()
     
     def _draw_mode_select(self):
-        """Draw mode selection screen"""
-        title = self.large_font.render("DUNGEON EXPLORER", True, COLORS['gold'])
-        title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 200))
-        self.screen.blit(title, title_rect)
+        # Gradient background
+        draw_gradient_rect(self.screen, pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT),
+                          COLORS['gradient_top'], COLORS['gradient_bottom'])
         
-        subtitle = self.font.render("Select Mode", True, COLORS['white'])
-        subtitle_rect = subtitle.get_rect(center=(SCREEN_WIDTH // 2, 280))
+        # Animated title
+        pulse = math.sin(pygame.time.get_ticks() / 500) * 0.1 + 1
+        title = self.title_font.render("DUNGEON EXPLORER", True, COLORS['gold'])
+        title_scaled = pygame.transform.scale(title, 
+                                             (int(title.get_width() * pulse), 
+                                              int(title.get_height() * pulse)))
+        title_rect = title_scaled.get_rect(center=(SCREEN_WIDTH // 2, 150))
+        self.screen.blit(title_scaled, title_rect)
+        
+        # Subtitle with glow effect
+        subtitle = self.subtitle_font.render("MULTIPLAYER ADVENTURE", True, COLORS['ui_accent'])
+        subtitle_rect = subtitle.get_rect(center=(SCREEN_WIDTH // 2, 230))
+        
+        # Glow
+        for offset in [(2, 2), (-2, 2), (2, -2), (-2, -2)]:
+            glow_surf = self.subtitle_font.render("MULTIPLAYER ADVENTURE", True, (50, 100, 150, 100))
+            glow_rect = glow_surf.get_rect(center=(SCREEN_WIDTH // 2 + offset[0], 230 + offset[1]))
+            self.screen.blit(glow_surf, glow_rect)
+        
         self.screen.blit(subtitle, subtitle_rect)
         
         # Server button
-        pygame.draw.rect(self.screen, COLORS['blue'], (550, 350, 200, 70))
-        pygame.draw.rect(self.screen, COLORS['white'], (550, 350, 200, 70), 3)
-        text = self.font.render("Host Server", True, COLORS['white'])
-        text_rect = text.get_rect(center=(650, 385))
-        self.screen.blit(text, text_rect)
+        server_rect = pygame.Rect(450, 350, 250, 80)
+        server_hover = server_rect.collidepoint(self.mouse_pos)
+        draw_button(self.screen, server_rect, "HOST SERVER", self.font, server_hover, "🖥")
         
-        hint = self.font.render("Press 1", True, COLORS['light_gray'])
-        hint_rect = hint.get_rect(center=(650, 440))
+        hint = self.font.render("Press 1 or Click", True, COLORS['ui_text_dim'])
+        hint_rect = hint.get_rect(center=(575, 450))
         self.screen.blit(hint, hint_rect)
         
         # Client button
-        pygame.draw.rect(self.screen, COLORS['green'], (850, 350, 200, 70))
-        pygame.draw.rect(self.screen, COLORS['white'], (850, 350, 200, 70), 3)
-        text = self.font.render("Join Game", True, COLORS['white'])
-        text_rect = text.get_rect(center=(950, 385))
-        self.screen.blit(text, text_rect)
+        client_rect = pygame.Rect(900, 350, 250, 80)
+        client_hover = client_rect.collidepoint(self.mouse_pos)
+        draw_button(self.screen, client_rect, "JOIN GAME", self.font, client_hover, "🎮")
         
-        hint = self.font.render("Press 2", True, COLORS['light_gray'])
-        hint_rect = hint.get_rect(center=(950, 440))
+        hint = self.font.render("Press 2 or Click", True, COLORS['ui_text_dim'])
+        hint_rect = hint.get_rect(center=(1025, 450))
         self.screen.blit(hint, hint_rect)
         
-        # Instructions
+        # Instructions panel
+        panel_rect = pygame.Rect(350, 540, 900, 280)
+        draw_rounded_rect(self.screen, panel_rect, COLORS['ui_panel'], radius=15,
+                         border_color=COLORS['ui_border'], border_width=2)
+        
+        instructions_title = self.subtitle_font.render("HOW TO PLAY", True, COLORS['gold'])
+        title_rect = instructions_title.get_rect(center=(SCREEN_WIDTH // 2, 580))
+        self.screen.blit(instructions_title, title_rect)
+        
         instructions = [
-            "Use Arrow Keys to move",
-            "Press Space to attack",
-            "Collect gold, health potions, and keys",
-            "Reach the cyan exit to advance"
+            "⌨  Use Arrow Keys to move your character",
+            "⚔  Press Space to attack enemies and breakable walls",
+            "💰 Collect gold coins to increase your score",
+            "❤  Pick up health potions to restore HP",
+            "🔑 Find keys to unlock special areas",
+            "🚪 Reach the cyan exit to advance to the next level"
         ]
-        y_offset = 550
+        
+        y_offset = 630
         for instruction in instructions:
-            text = self.font.render(instruction, True, COLORS['light_gray'])
+            text = self.font.render(instruction, True, COLORS['ui_text'])
             text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, y_offset))
             self.screen.blit(text, text_rect)
-            y_offset += 35
+            y_offset += 32
     
     def _draw_login(self):
-        """Draw login screen"""
-        title = self.large_font.render("LOGIN", True, COLORS['gold'])
-        title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 200))
+        # Gradient background
+        draw_gradient_rect(self.screen, pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT),
+                          COLORS['gradient_top'], COLORS['gradient_bottom'])
+        
+        # Main login panel
+        panel_rect = pygame.Rect(400, 150, 800, 600)
+        draw_rounded_rect(self.screen, panel_rect, COLORS['ui_panel'], radius=20,
+                         border_color=COLORS['ui_border'], border_width=3)
+        
+        # Title
+        title = self.title_font.render("LOGIN", True, COLORS['gold'])
+        title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 220))
         self.screen.blit(title, title_rect)
         
         # Username field
-        label = self.font.render("Username:", True, COLORS['white'])
-        self.screen.blit(label, (500, 320))
+        label = self.subtitle_font.render("Username", True, COLORS['ui_text'])
+        self.screen.blit(label, (550, 280))
         
-        color = COLORS['gold'] if self.active_field == "username" else COLORS['gray']
-        pygame.draw.rect(self.screen, color, (650, 350, 300, 40), 2)
-        text = self.font.render(self.username, True, COLORS['white'])
-        self.screen.blit(text, (660, 355))
+        username_rect = pygame.Rect(550, 320, 500, 50)
+        draw_input_field(self.screen, username_rect, self.username, 
+                        self.font, self.active_field == "username")
         
         # Password field
-        label = self.font.render("Password:", True, COLORS['white'])
-        self.screen.blit(label, (500, 420))
+        label = self.subtitle_font.render("Password", True, COLORS['ui_text'])
+        self.screen.blit(label, (550, 380))
         
-        color = COLORS['gold'] if self.active_field == "password" else COLORS['gray']
-        pygame.draw.rect(self.screen, color, (650, 450, 300, 40), 2)
-        text = self.font.render("*" * len(self.password), True, COLORS['white'])
-        self.screen.blit(text, (660, 455))
+        password_rect = pygame.Rect(550, 420, 500, 50)
+        draw_input_field(self.screen, password_rect, self.password, 
+                        self.font, self.active_field == "password", password=True)
         
         # Login button
-        pygame.draw.rect(self.screen, COLORS['green'], (700, 550, 200, 60))
-        pygame.draw.rect(self.screen, COLORS['white'], (700, 550, 200, 60), 3)
-        text = self.font.render("LOGIN", True, COLORS['white'])
-        text_rect = text.get_rect(center=(800, 580))
-        self.screen.blit(text, text_rect)
+        login_rect = pygame.Rect(650, 530, 300, 60)
+        login_hover = login_rect.collidepoint(self.mouse_pos)
+        draw_button(self.screen, login_rect, "LOGIN", self.subtitle_font, login_hover)
         
         # Error message
         if self.error_message:
+            error_panel = pygame.Rect(500, 620, 600, 50)
+            draw_rounded_rect(self.screen, error_panel, (100, 30, 30), radius=8,
+                            border_color=COLORS['red'], border_width=2)
             error = self.font.render(self.error_message, True, COLORS['red'])
-            error_rect = error.get_rect(center=(SCREEN_WIDTH // 2, 650))
+            error_rect = error.get_rect(center=(SCREEN_WIDTH // 2, 645))
             self.screen.blit(error, error_rect)
         
         # Hint
-        hint = self.font.render("Default: user / pass", True, COLORS['light_gray'])
-        hint_rect = hint.get_rect(center=(SCREEN_WIDTH // 2, 720))
+        hint = self.font.render("Default credentials: user / pass", True, COLORS['ui_text_dim'])
+        hint_rect = hint.get_rect(center=(SCREEN_WIDTH // 2, 690))
         self.screen.blit(hint, hint_rect)
         
         # Connection status
         if self.is_server:
-            status = "Waiting for client..." if not self.is_connected else "Client connected!"
-            color = COLORS['yellow'] if not self.is_connected else COLORS['green']
-            text = self.font.render(status, True, color)
-            text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 780))
+            status_color = COLORS['orange'] if not self.is_connected else COLORS['green']
+            status_text = "⏳ Waiting for client..." if not self.is_connected else "✓ Client connected!"
+            status_panel = pygame.Rect(450, 720, 700, 40)
+            draw_rounded_rect(self.screen, status_panel, COLORS['ui_panel'], radius=8,
+                            border_color=status_color, border_width=2)
+            text = self.font.render(status_text, True, status_color)
+            text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 740))
             self.screen.blit(text, text_rect)
     
     def _draw_game(self):
-        """Draw main game screen"""
+        self.screen.fill(COLORS['ui_bg'])
+        
         maze_width = len(LEVELS[0][0]) * TILE_SIZE
         maze_height = len(LEVELS[0]) * TILE_SIZE
         
-        # Draw maze 1 (left side)
+        # Calculate centered positions for both mazes
+        total_width = maze_width * 2 + MAZE_GAP
+        left_margin = (SCREEN_WIDTH - total_width) // 2
+        
         if self.maze1:
-            self.maze1.draw(self.screen, 50)
-            self._draw_info_bar(self.maze1, 50, maze_height + 20, "Player 1")
+            self.maze1.draw(self.screen, left_margin)
+            self._draw_info_bar(self.maze1, left_margin, maze_height + 20, "PLAYER 1", COLORS['yellow'])
         
-        # Draw maze 2 (right side)
         if self.maze2:
-            offset_x = 50 + maze_width + MAZE_GAP
+            offset_x = left_margin + maze_width + MAZE_GAP
             self.maze2.draw(self.screen, offset_x)
-            self._draw_info_bar(self.maze2, offset_x, maze_height + 20, "Player 2")
+            self._draw_info_bar(self.maze2, offset_x, maze_height + 20, "PLAYER 2", COLORS['green'])
         
-        # Draw level indicator
-        level_text = self.large_font.render(f"Level {self.current_level + 1}", 
-                                           True, COLORS['gold'])
-        level_rect = level_text.get_rect(center=(SCREEN_WIDTH // 2, 30))
+        # Level indicator with style
+        level_panel = pygame.Rect(SCREEN_WIDTH // 2 - 150, 10, 300, 60)
+        draw_rounded_rect(self.screen, level_panel, COLORS['ui_panel'], radius=10,
+                         border_color=COLORS['gold'], border_width=3)
+        
+        level_text = self.subtitle_font.render(f"LEVEL {self.current_level + 1}", 
+                                              True, COLORS['gold'])
+        level_rect = level_text.get_rect(center=(SCREEN_WIDTH // 2, 40))
         self.screen.blit(level_text, level_rect)
     
-    def _draw_info_bar(self, maze: MazeState, x: int, y: int, label: str):
-        """Draw information bar for a maze"""
+    def _draw_info_bar(self, maze: MazeState, x: int, y: int, label: str, color: tuple):
         if not maze.player:
             return
         
-        # Background
-        pygame.draw.rect(self.screen, COLORS['dark_gray'],
-                        (x, y, len(LEVELS[0][0]) * TILE_SIZE, 70))
-        pygame.draw.rect(self.screen, COLORS['white'],
-                        (x, y, len(LEVELS[0][0]) * TILE_SIZE, 70), 2)
+        bar_width = len(LEVELS[0][0]) * TILE_SIZE
+        bar_rect = pygame.Rect(x, y, bar_width, 80)
         
-        # Label
-        label_text = self.font.render(label, True, COLORS['gold'])
-        self.screen.blit(label_text, (x + 10, y + 5))
+        draw_rounded_rect(self.screen, bar_rect, COLORS['ui_panel'], radius=10,
+                         border_color=COLORS['ui_border'], border_width=2)
         
-        # Health bar
-        health_text = self.font.render("Health:", True, COLORS['white'])
-        self.screen.blit(health_text, (x + 10, y + 35))
+        # Player label
+        label_text = self.subtitle_font.render(label, True, color)
+        self.screen.blit(label_text, (x + 15, y + 10))
         
-        bar_x = x + 100
-        bar_y = y + 35
-        bar_width = 150
-        bar_height = 20
+        # Health bar with gradient
+        health_label = self.font.render("HP:", True, COLORS['ui_text'])
+        self.screen.blit(health_label, (x + 15, y + 45))
         
-        pygame.draw.rect(self.screen, COLORS['health_bar_bg'],
-                        (bar_x, bar_y, bar_width, bar_height))
-        health_width = int(bar_width * (maze.player.health / maze.player.max_health))
-        pygame.draw.rect(self.screen, COLORS['health_bar'],
-                        (bar_x, bar_y, health_width, bar_height))
-        pygame.draw.rect(self.screen, COLORS['white'],
-                        (bar_x, bar_y, bar_width, bar_height), 2)
+        bar_x = x + 60
+        bar_y = y + 45
+        bar_w = 200
+        bar_h = 25
         
-        # Score
-        score_text = self.font.render(f"Score: {maze.player.score}", 
-                                     True, COLORS['gold'])
-        self.screen.blit(score_text, (x + 270, y + 35))
+        # Health bar background
+        health_bg_rect = pygame.Rect(bar_x, bar_y, bar_w, bar_h)
+        draw_rounded_rect(self.screen, health_bg_rect, COLORS['health_bar_bg'], radius=5)
         
-        # Keys
-        keys_text = self.font.render(f"Keys: {maze.player.keys}", 
-                                    True, COLORS['gold'])
-        self.screen.blit(keys_text, (x + 450, y + 35))
+        # Health bar fill with gradient
+        health_ratio = maze.player.health / maze.player.max_health
+        health_width = int(bar_w * health_ratio)
+        if health_width > 0:
+            health_rect = pygame.Rect(bar_x, bar_y, health_width, bar_h)
+            health_color = COLORS['health_bar'] if health_ratio > 0.3 else (150, 0, 0)
+            draw_rounded_rect(self.screen, health_rect, health_color, radius=5)
+        
+        # Health bar border
+        pygame.draw.rect(self.screen, COLORS['ui_border'], 
+                        pygame.Rect(bar_x - 1, bar_y - 1, bar_w + 2, bar_h + 2), 2, border_radius=5)
+        
+        # Health text
+        health_text = self.font.render(f"{maze.player.health}/{maze.player.max_health}", 
+                                       True, COLORS['white'])
+        health_text_rect = health_text.get_rect(center=(bar_x + bar_w // 2, bar_y + bar_h // 2))
+        self.screen.blit(health_text, health_text_rect)
+        
+        # Score with icon
+        score_text = self.font.render(f"💰 {maze.player.score}", True, COLORS['gold'])
+        self.screen.blit(score_text, (x + 280, y + 45))
+        
+        # Keys with icon
+        keys_text = self.font.render(f"🔑 {maze.player.keys}", True, COLORS['gold'])
+        self.screen.blit(keys_text, (x + 420, y + 45))
     
     def _draw_level_complete(self):
-        """Draw level complete screen"""
-        self._draw_game()  # Draw game in background
+        self._draw_game()
         
         # Overlay
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-        overlay.set_alpha(180)
+        overlay.set_alpha(200)
         overlay.fill(COLORS['black'])
         self.screen.blit(overlay, (0, 0))
         
+        # Completion panel
+        panel_rect = pygame.Rect(400, 300, 800, 300)
+        draw_rounded_rect(self.screen, panel_rect, COLORS['ui_panel'], radius=20,
+                         border_color=COLORS['gold'], border_width=4)
+        
+        # Animated checkmark
+        pulse = math.sin(pygame.time.get_ticks() / 200) * 0.15 + 1
+        checkmark = self.title_font.render("✓", True, COLORS['green'])
+        checkmark_scaled = pygame.transform.scale(checkmark,
+                                                 (int(checkmark.get_width() * pulse),
+                                                  int(checkmark.get_height() * pulse)))
+        check_rect = checkmark_scaled.get_rect(center=(SCREEN_WIDTH // 2, 380))
+        self.screen.blit(checkmark_scaled, check_rect)
+        
         # Text
-        text = self.large_font.render("LEVEL COMPLETE!", True, COLORS['gold'])
-        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        text = self.title_font.render("LEVEL COMPLETE!", True, COLORS['gold'])
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 480))
         self.screen.blit(text, text_rect)
         
-        next_text = self.font.render(f"Advancing to Level {self.current_level + 1}...",
-                                    True, COLORS['white'])
-        next_rect = next_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
+        next_text = self.subtitle_font.render(f"Advancing to Level {self.current_level + 1}...",
+                                             True, COLORS['ui_text'])
+        next_rect = next_text.get_rect(center=(SCREEN_WIDTH // 2, 550))
         self.screen.blit(next_text, next_rect)
     
     def _draw_game_over(self):
-        """Draw game over screen"""
-        self.screen.fill(COLORS['black'])
+        # Gradient background
+        draw_gradient_rect(self.screen, pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT),
+                          COLORS['gradient_top'], COLORS['gradient_bottom'])
         
         # Determine winner
         p1_score = self.maze1.player.score if self.maze1 and self.maze1.player else 0
@@ -1316,41 +2052,64 @@ class Game:
         
         if p1_score > p2_score:
             winner = "PLAYER 1 WINS!"
-            color = COLORS['yellow']
+            winner_color = COLORS['yellow']
+            trophy = "🏆"
         elif p2_score > p1_score:
             winner = "PLAYER 2 WINS!"
-            color = COLORS['green']
+            winner_color = COLORS['green']
+            trophy = "🏆"
         else:
             winner = "TIE GAME!"
-            color = COLORS['gold']
+            winner_color = COLORS['gold']
+            trophy = "🤝"
         
-        # Title
-        title = self.large_font.render("GAME OVER", True, COLORS['red'])
-        title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 200))
+        # Main panel
+        panel_rect = pygame.Rect(300, 150, 1000, 600)
+        draw_rounded_rect(self.screen, panel_rect, COLORS['ui_panel'], radius=20,
+                         border_color=COLORS['ui_border'], border_width=3)
+        
+        # Game Over title
+        title = self.title_font.render("GAME OVER", True, COLORS['red'])
+        title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 220))
         self.screen.blit(title, title_rect)
         
-        # Winner
-        winner_text = self.large_font.render(winner, True, color)
-        winner_rect = winner_text.get_rect(center=(SCREEN_WIDTH // 2, 300))
+        # Trophy/Icon with animation
+        pulse = math.sin(pygame.time.get_ticks() / 300) * 0.2 + 1.2
+        trophy_text = self.title_font.render(trophy, True, winner_color)
+        trophy_scaled = pygame.transform.scale(trophy_text,
+                                              (int(trophy_text.get_width() * pulse),
+                                               int(trophy_text.get_height() * pulse)))
+        trophy_rect = trophy_scaled.get_rect(center=(SCREEN_WIDTH // 2, 320))
+        self.screen.blit(trophy_scaled, trophy_rect)
+        
+        # Winner text
+        winner_text = self.title_font.render(winner, True, winner_color)
+        winner_rect = winner_text.get_rect(center=(SCREEN_WIDTH // 2, 420))
         self.screen.blit(winner_text, winner_rect)
         
-        # Scores
-        p1_text = self.font.render(f"Player 1 Score: {p1_score}", True, COLORS['white'])
-        p1_rect = p1_text.get_rect(center=(SCREEN_WIDTH // 2, 400))
+        # Score panel
+        score_panel_rect = pygame.Rect(450, 500, 700, 150)
+        draw_rounded_rect(self.screen, score_panel_rect, COLORS['ui_bg'], radius=15,
+                         border_color=COLORS['ui_border'], border_width=2)
+        
+        # Player scores
+        p1_text = self.subtitle_font.render(f"Player 1: {p1_score} points", True, COLORS['yellow'])
+        p1_rect = p1_text.get_rect(center=(SCREEN_WIDTH // 2, 550))
         self.screen.blit(p1_text, p1_rect)
         
-        p2_text = self.font.render(f"Player 2 Score: {p2_score}", True, COLORS['white'])
-        p2_rect = p2_text.get_rect(center=(SCREEN_WIDTH // 2, 450))
+        p2_text = self.subtitle_font.render(f"Player 2: {p2_score} points", True, COLORS['green'])
+        p2_rect = p2_text.get_rect(center=(SCREEN_WIDTH // 2, 600))
         self.screen.blit(p2_text, p2_rect)
         
-        # Exit message
-        exit_text = self.font.render("Press ESC to return to menu", 
-                                    True, COLORS['light_gray'])
-        exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH // 2, 600))
+        # Exit instruction
+        exit_panel = pygame.Rect(550, 680, 500, 50)
+        draw_rounded_rect(self.screen, exit_panel, COLORS['ui_panel'], radius=10,
+                         border_color=COLORS['ui_border'], border_width=2)
+        exit_text = self.font.render("Press ESC to return to menu", True, COLORS['ui_text_dim'])
+        exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH // 2, 705))
         self.screen.blit(exit_text, exit_rect)
     
     def run(self):
-        """Main game loop"""
         while self.running:
             self.handle_events()
             self.update()
@@ -1358,10 +2117,12 @@ class Game:
             self.clock.tick(FPS)
         
         # Cleanup
+        self.stop_music()
         if self.socket:
             self.socket.close()
         if self.connection:
             self.connection.close()
+        pygame.mixer.quit()
         pygame.quit()
         sys.exit()
 
