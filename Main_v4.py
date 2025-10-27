@@ -143,7 +143,7 @@ LEVELS = [
         "#.#####.####.#####.#",
         "#.....#.#..#.#.....#",
         "####..#.#..#.#..####",
-        "#..#..G.####.G..#..#",
+        "#..#..G.####.G..G..#",
         "#..#############...#",
         "#..............#...#",
         "#..############....#",
@@ -229,16 +229,16 @@ LEVELS = [
         "#################..#",
         "#.E...............##",
         "#.################.#",
-        "#................#.#",
+        "#................G.#",
         "#################..#",
         "#.E...........G...##",
         "#.################.#",
-        "#........H.......#.#",
+        "#........H.......E.#",
         "#################..#",
         "#.E.............K.##",
         "#.################.#",
         "#................#.#",
-        "#.E..............#L#",
+        "#.E..............kL#",
         "####################"
     ],
     # Level 7 - Treasure Chamber
@@ -259,13 +259,13 @@ LEVELS = [
         "#.#...#.....#...#..#",
         "#.#.###########.#.##",
         "#.#.............#..#",
-        "#.#.............#.L#",
+        "#.E.............H.L#",
         "####################"
     ],
     # Level 8 - Spiral Descent
     [
         "####################",
-        "#P#################",
+        "#P#################G",
         "#.................##",
         "##.#############..##",
         "##.#...........#..##",
@@ -304,7 +304,7 @@ LEVELS = [
         "#.................L#",
         "####################"
     ],
-    # Level 10 - Winding Paths
+    # Level 10 - Winding Paths + BOSS
     [
         "####################",
         "#P#..........#.....#",
@@ -319,31 +319,31 @@ LEVELS = [
         "#.#######.###.##.#.#",
         "#.........G.#....#.#",
         "###########.######.#",
-        "#...........E......#",
-        "#.#################",
+        "#.........X.E......#",
+        "#.#################.",
         "#.K...............H#",
-        "#..................L#",
+        "#..................L",
         "####################"
     ],
     # Level 11 - Chamber Complex
     [
         "####################",
         "#P...#.....#.......#",
-        "#.##.#.###.#.###.##.#",
-        "#.##.#.#...#.#...##.#",
-        "#....#.#.###.#.#....#",
-        "####.#.#.....#.#.####",
-        "#....#.###E###.#....#",
-        "#.####.........####.#",
-        "#.#..............#..#",
-        "#.#.####.#.####.##.##",
-        "#.#.#....#....#....##",
-        "#.#.#.########.####.#",
-        "#.#.#.#......#.#....#",
-        "#...#.#.GKHG.#.#....#",
-        "#####.#......#.#.####",
-        "#.....########.....E#",
-        "#..................L#",
+        "#.##.#.###.#.###.##.",
+        "#.##.#.#...#.#...##.",
+        "#....#.#.###.#.#....",
+        "####.#.#.....#.#.###",
+        "#....#.###E###.#....",
+        "#.####.........####.",
+        "#.#..............#..",
+        "#.#.####.#.####.##.#",
+        "#.#.#....#....#....#",
+        "#.#.#.########.####.",
+        "#.#.#.#......#.#....",
+        "#...#.#.GKHG.#.#....",
+        "#####.#......#.#.###",
+        "#.....########.....E",
+        "#..................L",
         "####################"
     ],
     # Level 12 - Double Spiral
@@ -364,13 +364,13 @@ LEVELS = [
         "#.#...#..##..#...#.#",
         "#.#####..##..#####.#",
         "#........##........#",
-        "#..................L#",
+        "#..................L",
         "####################"
     ],
     # Level 13 - Checkered Chaos
     [
         "####################",
-        "#P.#.#.#.#.#.#.#.#.#",
+        "BP.#.#.#.#.#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
         "##.#.#.#.#.#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
@@ -385,7 +385,7 @@ LEVELS = [
         "##.#.#.#.#.#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
         "##.#.#.#.#.#.#.#.#E#",
-        "#..................L#",
+        "#..................L",
         "####################"
     ],
     # Level 14 - The Labyrinth
@@ -402,30 +402,30 @@ LEVELS = [
         "#.#.#.........#.#.##",
         "#.#.#.#######.#.#.##",
         "#.#.#.#EGKHE#.#.#.##",
-        "#.#.#.#######.#.#.##",
         "#.#.#.........#.#.##",
-        "#.#.###########.#.##",
+        "#.#.#.........#.#.##",
+        "#.#.H.GH...HHHH.#.##",
         "#.#.............#E.#",
-        "#.#.............#.L#",
+        "#.B.............G.L#",
         "####################"
     ],
-    # Level 15 - Fortress Interior
+    # Level 15 - Fortress Interior + BOSS
     [
         "####################",
         "#P################.#",
         "#.................##",
         "#.################.#",
-        "##................##",
+        "#.................##",
         "#.################.#",
-        "##................##",
+        "#.................##",
+        "B.################.#",
+        "#X...EHHHHHX...E..G#",
         "#.################.#",
-        "##...E.........E..##",
+        "##HHHHHGKHG.......X#",
+        "#.################H#",
+        "##.................#",
         "#.################.#",
-        "##.....GKHG.......##",
-        "#.################.#",
-        "##................##",
-        "#.################.#",
-        "##................##",
+        "##.................#",
         "#.#############E##.#",
         "##................L#",
         "####################"
@@ -448,13 +448,13 @@ LEVELS = [
         "#.#....#.##.#....#.#",
         "#.######.##.######.#",
         "#........##........#",
-        "#..................L#",
+        "#..................L",
         "####################"
     ],
     # Level 17 - Snake Path
     [
         "####################",
-        "#P#################",
+        "#P#################.",
         "#.................##",
         "##.#################",
         "##.................#",
@@ -476,21 +476,21 @@ LEVELS = [
     [
         "####################",
         "#P...#....#....#...#",
-        "#.##.#.##.#.##.#.##.#",
-        "#.##.#.##.#.##.#.##.#",
-        "#....#....#....#....#",
-        "#.##.#.##.#.##.#.##.#",
-        "#.##.#.##.#.##.#.##.#",
-        "#....#....#....#....#",
-        "#.##E#.##.#.##.#E##.#",
-        "#.##.#.##.#.##.#.##.#",
-        "#....#....#....#....#",
-        "#.##.#.##G#K##H#.##.#",
-        "#.##.#.##.#.##.#.##.#",
-        "#....#....#....#....#",
-        "#.##.#.##.#.##.#.##.#",
-        "#.##.#.##.#.##.#.##.#",
-        "#....#....#....#...L#",
+        "#.##.#.##.#.##.#.##.",
+        "#.##.#.##.#.##.#.##.",
+        "#....#....#....#....",
+        "#.##.#.##.#.##.#.##.",
+        "#.##.#.##.#.##.#.##.",
+        "#....#....#....#....",
+        "#.##E#.##.#.##.#E##.",
+        "#.##.#.##.#.##.#.##.",
+        "#....#....#....#....",
+        "#.##.#.##G#K##H#.##.",
+        "#.##.#.##.#.##.#.##.",
+        "#....#....#....#....",
+        "#.##.#.##.#.##.#.##.",
+        "#.##.#.##.#.##.#.##.",
+        "#....H....G....X...L",
         "####################"
     ],
     # Level 19 - Central Fortress
@@ -514,7 +514,7 @@ LEVELS = [
         "#.#.############.#L#",
         "####################"
     ],
-    # Level 20 - Diagonal Challenge
+    # Level 20 - Diagonal Challenge + BOSS
     [
         "####################",
         "#P.................#",
@@ -525,14 +525,14 @@ LEVELS = [
         "####.###########.###",
         "####...........#.###",
         "#####.#########.####",
-        "#####.E.......#.####",
+        "#####.X.......#.####",
         "######.#######.#####",
-        "######.#.....#.#####",
+        "######.G.E...#.#####",
         "#######.#.###.######",
-        "#######.#.#G#.######",
+        "#######...#G#.######",
         "########.#.#K#######",
-        "########.#.#H#######",
-        "#########.#.#......L",
+        "########...#H#######",
+        "#########.E.H......L",
         "####################"
     ],
     # Level 21 - The Grid
@@ -553,7 +553,7 @@ LEVELS = [
         "#.#.#.#.#.#.#.#.#.##",
         "#.#.#.#.#.#.#.#.#.##",
         "#.#.#.#.#.#.#.#.#E##",
-        "#..................L#",
+        "#..................L",
         "####################"
     ],
     # Level 22 - Double Helix
@@ -574,13 +574,13 @@ LEVELS = [
         "#.#.#.######.#.#.#.#",
         "#.#.#........#.#.#.#",
         "#.#.##########.#.#.#",
-        "#.#..............#L#",
+        "#.G..............XL#",
         "####################"
     ],
     # Level 23 - The Crosshatch
     [
         "####################",
-        "#P#.#.#.#.#.#.#.#.##",
+        "BP#.#.#.#.#.#.#.#.##",
         "#.#.#.#.#.#.#.#.#.##",
         "##.#.#.#.#.#.#.#.#.#",
         "##.#.#.#.#.#.#.#.#.#",
@@ -595,7 +595,7 @@ LEVELS = [
         "#.#.#.#.#.#.#.#.#.##",
         "#.#.#.#.#.#.#.#.#.##",
         "##.#.#.#.#.#.#.#.#E#",
-        "##.................L#",
+        "##.................L",
         "####################"
     ],
     # Level 24 - The Catacombs
@@ -615,29 +615,29 @@ LEVELS = [
         "#.#.#.#.....#.#.#.##",
         "#.#.#.#######.#.#.##",
         "#.#.#GKHE.....#.#.##",
-        "#.#.##########.#.#.##",
-        "#.#............#...L",
+        "#.#.##########.#.#.#",
+        "#.E............X...L",
         "####################"
     ],
-    # Level 25 - Ultimate Maze
+    # Level 25 - Ultimate Maze + BOSSES
     [
         "####################",
         "#P#.#.#.#.#.#.#.#..#",
         "#.#.#.#.#.#.#.#.##.#",
         "#.#.#.#.#.#.#.#..#.#",
-        "#.#.#.#.#.#.#.##.#.#",
+        "#.#.#.#X#.#.#.##.#.#",
         "#.#.#.#.#.#.#..#.#.#",
         "#.#.#.#.#.#.##.#.#.#",
         "#.#.#.#.#.#..#.#.#.#",
         "#.#.#.#.#.##.#.#.#.#",
         "#.#.#.#E#..#.#.#.#.#",
         "#.#.#.#.##.#.#.#.#.#",
-        "#.#.#.#..#.#.#.#.#.#",
+        "#.#.#.#..#X#.#.#.#.#",
         "#.#.#.##.#.#.#.#.#.#",
         "#.#.#GKHE#.#.#.#.#.#",
         "#.#.####.#.#.#.#.#.#",
         "#.#......#.#.#.#.#E#",
-        "#.########.#.#.#...L",
+        "#..........X.H.E...L",
         "####################"
     ],
     # Level 26 - Boss Arena
@@ -649,15 +649,15 @@ LEVELS = [
         "#.#..............#.#",
         "#.#..............#.#",
         "#.#..............#.#",
-        "#.#..............#.#",
+        "#.#..............E.#",
         "#.#......EEE.....#.#",
-        "#.#......EEE.....#.#",
+        "#.#......EEE.....H.#",
         "#.#......EEE.....#.#",
         "#.#..............#.#",
         "#.#.....GKHG.....#.#",
+        "#.#..............B.#",
         "#.#..............#.#",
-        "#.#..............#.#",
-        "#.#..............#.#",
+        "#.#..............E.#",
         "#.################L#",
         "####################"
     ],
@@ -708,41 +708,41 @@ LEVELS = [
         "####################",
         "#P................E#",
         "##.###############.#",
-        "##.#.............#.#",
+        "##.#.............B.#",
         "###.#.###########.##",
-        "###.#.#.........#.##",
+        "###.#.#.........X.##",
         "####.#.#.#######.###",
-        "####.#.#.#.....#.###",
+        "####.#.#.#.......###",
         "#####.#.#.#.###.####",
-        "#####.#.#.#E#G#.####",
+        "#####.#.#.#E#GE.####",
         "######.#.#.#K#.#####",
-        "######.#.#.#H#.#####",
+        "######.#.#.#HH.#####",
         "#######.#.#.#.######",
         "#######.#.#.#.######",
-        "########.#.#.#######",
-        "########.#.#.#######",
+        "########.#.#.B######",
+        "########.#.#.X######",
         "#########.#.......L#",
         "####################"
     ],
-    # Level 30 - Final Challenge
+    # Level 30 - Final Challenge + FINAL BOSSES
     [
         "####################",
-        "#P#.#.#.#.#.#.#.#.##",
+        "BP#.#.#.#.#.#.#.#.##",
         "#.#E#.#.#.#.#.#E#.##",
-        "##.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#X#.#.#.#.#.#",
         "##.#.#.#.#.#.#.#.#.#",
         "#.#E#.#.#.#.#.#E#.##",
-        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#X#.#.#.#.##",
         "##.#.#.#.#.#.#.#.#.#",
         "##.#E#.#.#.#.#E#.#.#",
-        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#X#.#.#.#.##",
         "#.#.#.#G#K#H#.#.#.##",
         "##.#E#.#.#.#.#E#.#.#",
         "##.#.#.#.#.#.#.#.#.#",
-        "#.#.#.#.#.#.#.#.#.##",
+        "#.#.#.#.#X#.#.#.#.##",
         "#.#E#.#.#.#.#.#E#.##",
         "##.#.#.#.#.#.#.#.#E#",
-        "##.................L#",
+        "##.................L",
         "####################"
     ],
 ]
@@ -969,10 +969,18 @@ class Player(Entity):
         self.anim_timer = 0
     
     def move(self, dx: int, dy: int, walls: List[Wall]):
+        # Only update direction/facing for cardinal directions (not diagonals)
         if dx != 0 or dy != 0:
-            self.direction = Direction((dx, dy))
-            if dx != 0 or dy != 0:
+            # Try to set direction for valid enum values only
+            try:
+                self.direction = Direction((dx, dy))
                 self.facing = Direction((dx, dy))
+            except ValueError:
+                # Diagonal movement - prioritize horizontal for facing
+                if dx != 0:
+                    self.facing = Direction((dx, 0))
+                elif dy != 0:
+                    self.facing = Direction((0, dy))
         
         new_x = self.pos.x + dx * self.speed
         new_y = self.pos.y + dy * self.speed
@@ -1203,6 +1211,139 @@ class Enemy(Entity):
         self.state = state['state']
         self.patrol_target = Position(state['patrol_x'], state['patrol_y'])
 
+class Boss(Enemy):
+    """Boss enemy - larger, stronger, and more aggressive"""
+    def __init__(self, x: float, y: float):
+        super().__init__(x, y)
+        # Boss stats - much stronger than regular enemies
+        self.health = 150  # 5x regular enemy health
+        self.max_health = 150
+        self.speed = ENEMY_SPEED_CHASE  # Always moves at chase speed
+        self.damage = 15  # 3x regular enemy damage
+        self.size_multiplier = 1.5  # 50% larger
+        self.width = int(self.width * self.size_multiplier)
+        self.height = int(self.height * self.size_multiplier)
+        self.detection_range = ENEMY_DETECTION_RANGE * 1.5  # Detects from farther
+        self.is_boss = True
+        
+    def update(self, player: Player, walls: List[Wall]):
+        """Boss AI - always aggressive"""
+        dist = self.pos.distance_to(player.pos)
+        
+        # Boss always chases when player is in extended range
+        if dist < self.detection_range:
+            self.state = 'chase'
+            target = player.pos
+        else:
+            # Even when patrolling, bosses are aggressive
+            self.state = 'patrol'
+            
+            now = pygame.time.get_ticks()
+            if now > self.next_patrol_time or \
+               self.pos.distance_to(self.patrol_target) < 10:
+                # Patrol more aggressively toward center of map
+                center_x = len(LEVELS[0][0]) * TILE_SIZE // 2
+                center_y = len(LEVELS[0]) * TILE_SIZE // 2
+                self.patrol_target = Position(
+                    center_x + random.randint(-150, 150),
+                    center_y + random.randint(-150, 150)
+                )
+                self.next_patrol_time = now + random.randint(500, 1500)
+            target = self.patrol_target
+        
+        # Movement (same as regular enemy)
+        dx = target.x - self.pos.x
+        dy = target.y - self.pos.y
+        dist = math.hypot(dx, dy)
+        
+        if dist > 0:
+            dx = (dx / dist) * self.speed
+            dy = (dy / dist) * self.speed
+            
+            new_x = self.pos.x + dx
+            new_y = self.pos.y + dy
+            
+            test_rect = pygame.Rect(new_x - self.width // 2, new_y - self.height // 2,
+                                   self.width, self.height)
+            
+            collision = False
+            for wall in walls:
+                if not wall.breakable and test_rect.colliderect(wall.rect):
+                    collision = True
+                    break
+            
+            if not collision:
+                self.pos.x = new_x
+                self.pos.y = new_y
+                self.update_rect()
+        
+        # Boss attacks with more damage
+        if self.state == 'chase' and dist < ENEMY_ATTACK_RANGE * 1.2:
+            now = pygame.time.get_ticks()
+            if now - self.last_attack_time > ENEMY_ATTACK_COOLDOWN:
+                player.take_damage(self.damage)  # Use boss damage
+                self.last_attack_time = now
+    
+    def draw(self, surface: pygame.Surface, offset_x: int = 0):
+        """Draw boss with special appearance"""
+        draw_rect = self.rect.copy()
+        draw_rect.x += offset_x
+        
+        # Boss has a darker, more menacing color
+        if self.state == 'chase':
+            color = (180, 0, 0)  # Dark red when chasing
+        else:
+            color = (150, 0, 100)  # Dark purple when patrolling
+        
+        # Draw boss body with glow effect
+        glow_rect = draw_rect.inflate(6, 6)
+        pygame.draw.rect(surface, (255, 0, 0, 100), glow_rect, border_radius=5)
+        pygame.draw.rect(surface, color, draw_rect, border_radius=3)
+        pygame.draw.rect(surface, COLORS['black'], draw_rect, 3, border_radius=3)
+        
+        # Draw crown/horns to indicate boss
+        crown_points = [
+            (draw_rect.centerx - 10, draw_rect.top),
+            (draw_rect.centerx - 8, draw_rect.top - 8),
+            (draw_rect.centerx, draw_rect.top - 5),
+            (draw_rect.centerx + 8, draw_rect.top - 8),
+            (draw_rect.centerx + 10, draw_rect.top)
+        ]
+        pygame.draw.polygon(surface, COLORS['gold'], crown_points)
+        pygame.draw.polygon(surface, COLORS['black'], crown_points, 2)
+        
+        # Boss health bar (larger and more prominent)
+        if self.health < self.max_health or True:  # Always show boss health
+            bar_width = self.width + 10
+            bar_height = 6
+            bar_x = draw_rect.x - 5
+            bar_y = draw_rect.y - 15
+            
+            # Background
+            pygame.draw.rect(surface, COLORS['black'],
+                           (bar_x - 1, bar_y - 1, bar_width + 2, bar_height + 2))
+            pygame.draw.rect(surface, COLORS['health_bar_bg'],
+                           (bar_x, bar_y, bar_width, bar_height))
+            
+            # Health fill with gradient effect
+            health_width = int(bar_width * (self.health / self.max_health))
+            if health_width > 0:
+                health_color = (255, 0, 0) if self.health < self.max_health * 0.3 else (200, 0, 0)
+                pygame.draw.rect(surface, health_color,
+                               (bar_x, bar_y, health_width, bar_height))
+        
+        # Boss indicator text
+        font = pygame.font.Font(None, 20)
+        boss_text = font.render("BOSS", True, COLORS['gold'])
+        text_rect = boss_text.get_rect(center=(draw_rect.centerx, draw_rect.bottom + 8))
+        # Draw text shadow
+        shadow_rect = text_rect.copy()
+        shadow_rect.x += 1
+        shadow_rect.y += 1
+        shadow_text = font.render("BOSS", True, COLORS['black'])
+        surface.blit(shadow_text, shadow_rect)
+        surface.blit(boss_text, text_rect)
+
 class Collectible(Entity):
     def __init__(self, x: float, y: float, item_type: str):
         size = TILE_SIZE // 2
@@ -1276,6 +1417,8 @@ class MazeState:
                                         self.player_id, self.player_color)
                 elif tile == 'E':
                     self.enemies.append(Enemy(x + TILE_SIZE // 2, y + TILE_SIZE // 2))
+                elif tile == 'X':  # Boss enemy
+                    self.enemies.append(Boss(x + TILE_SIZE // 2, y + TILE_SIZE // 2))
                 elif tile in ['G', 'H', 'K']:
                     self.collectibles.append(Collectible(x, y, tile))
                 elif tile == 'L':
@@ -1410,6 +1553,7 @@ class Game:
         self.state = GameState.MODE_SELECT
         self.is_server = False
         self.is_connected = False
+        self.is_solo = False  # Single player mode flag
         self.running = True
         
         self.maze1: Optional[MazeState] = None
@@ -1627,7 +1771,13 @@ class Game:
         self.state = GameState.PLAYING
         self.current_level = 0
         self.maze1 = MazeState(1, LEVELS[0], self.player1_color)
-        self.maze2 = MazeState(2, LEVELS[0], self.player2_color)
+        
+        # Only create second maze if not in solo mode
+        if not self.is_solo:
+            self.maze2 = MazeState(2, LEVELS[0], self.player2_color)
+        else:
+            self.maze2 = None
+            
         self.play_level_music(1)  # Play level 1 music
     
     def advance_level(self):
@@ -1646,14 +1796,20 @@ class Game:
         p2_keys = self.maze2.player.keys if self.maze2 and self.maze2.player else 0
         
         self.maze1 = MazeState(1, LEVELS[self.current_level], self.player1_color)
-        self.maze2 = MazeState(2, LEVELS[self.current_level], self.player2_color)
+        
+        # Only create second maze if not in solo mode
+        if not self.is_solo:
+            self.maze2 = MazeState(2, LEVELS[self.current_level], self.player2_color)
+        else:
+            self.maze2 = None
         
         if self.maze1.player:
             self.maze1.player.health = p1_health
             self.maze1.player.score = p1_score
             self.maze1.player.keys = p1_keys
         
-        if self.maze2.player:
+        # Only update maze2 player if maze2 exists (not solo mode)
+        if self.maze2 and self.maze2.player:
             self.maze2.player.health = p2_health
             self.maze2.player.score = p2_score
             self.maze2.player.keys = p2_keys
@@ -1682,6 +1838,12 @@ class Game:
                         self.state = GameState.LOGIN
                         self.play_login_music()
                     elif event.key == pygame.K_2:
+                        # Solo mode
+                        self.is_solo = True
+                        self.state = GameState.LOGIN
+                        self.play_login_music()
+                    elif event.key == pygame.K_3:
+                        # Join game (multiplayer client)
                         self.state = GameState.LOGIN
                         self.play_login_music()
                 
@@ -1746,11 +1908,28 @@ class Game:
                 self.password += event.unicode
     
     def _handle_mode_select_click(self, pos):
-        server_rect = pygame.Rect(450, 350, 250, 80)
-        client_rect = pygame.Rect(900, 350, 250, 80)
+        # Calculate button positions (same as in _draw_mode_select)
+        button_width = 250
+        button_height = 80
+        button_spacing = 60
+        total_width = (button_width * 3) + (button_spacing * 2)
+        start_x = (SCREEN_WIDTH - total_width) // 2
+        button_y = 350
+        
+        # Server button (left)
+        server_rect = pygame.Rect(start_x, button_y, button_width, button_height)
+        # Solo button (middle)
+        solo_rect = pygame.Rect(start_x + button_width + button_spacing, button_y, button_width, button_height)
+        # Client button (right)
+        client_rect = pygame.Rect(start_x + (button_width + button_spacing) * 2, button_y, button_width, button_height)
         
         if server_rect.collidepoint(pos):
             self.start_server()
+            self.state = GameState.LOGIN
+            self.play_login_music()
+        elif solo_rect.collidepoint(pos):
+            # Solo mode
+            self.is_solo = True
             self.state = GameState.LOGIN
             self.play_login_music()
         elif client_rect.collidepoint(pos):
@@ -1813,7 +1992,11 @@ class Game:
         """Confirm player selection and start the game"""
         selected_player = PLAYER_OPTIONS[self.selected_player_index]
         
-        if self.is_server:
+        if self.is_solo:
+            # Solo mode - only show player 1's maze
+            self.player1_color = selected_player["color"]
+            self.start_game()
+        elif self.is_server:
             self.player1_color = selected_player["color"]
             self.start_game()
         else:
@@ -1823,17 +2006,23 @@ class Game:
                 self.state = GameState.PLAYING
     
     def update(self):
-        if self.state == GameState.PLAYING and self.is_server:
+        if self.state == GameState.PLAYING and (self.is_server or self.is_solo):
             if self.maze1:
                 dx, dy = 0, 0
-                if pygame.K_UP in self.keys_pressed:
+                
+                # Handle vertical movement (prioritize if both pressed)
+                if pygame.K_UP in self.keys_pressed and pygame.K_DOWN not in self.keys_pressed:
                     dy -= 1
-                if pygame.K_DOWN in self.keys_pressed:
+                elif pygame.K_DOWN in self.keys_pressed and pygame.K_UP not in self.keys_pressed:
                     dy += 1
-                if pygame.K_LEFT in self.keys_pressed:
+                # If both UP and DOWN pressed, don't move vertically (dy stays 0)
+                
+                # Handle horizontal movement (prioritize if both pressed)
+                if pygame.K_LEFT in self.keys_pressed and pygame.K_RIGHT not in self.keys_pressed:
                     dx -= 1
-                if pygame.K_RIGHT in self.keys_pressed:
+                elif pygame.K_RIGHT in self.keys_pressed and pygame.K_LEFT not in self.keys_pressed:
                     dx += 1
+                # If both LEFT and RIGHT pressed, don't move horizontally (dx stays 0)
                 
                 if self.maze1.player:
                     self.maze1.player.move(dx, dy, self.maze1.walls)
@@ -1853,7 +2042,8 @@ class Game:
                     self.state = GameState.GAME_OVER
                     self.play_game_over_music()
             
-            if self.maze2:
+            # Only update maze2 if not in solo mode
+            if self.maze2 and not self.is_solo:
                 self.maze2.update()
                 
                 if self.maze2.player and self.maze2.exit_rect:
@@ -1867,14 +2057,20 @@ class Game:
         elif self.state == GameState.PLAYING and not self.is_server:
             if self.maze2 and self.maze2.player:
                 dx, dy = 0, 0
-                if pygame.K_UP in self.keys_pressed:
+                
+                # Handle vertical movement (prioritize if both pressed)
+                if pygame.K_UP in self.keys_pressed and pygame.K_DOWN not in self.keys_pressed:
                     dy -= 1
-                if pygame.K_DOWN in self.keys_pressed:
+                elif pygame.K_DOWN in self.keys_pressed and pygame.K_UP not in self.keys_pressed:
                     dy += 1
-                if pygame.K_LEFT in self.keys_pressed:
+                # If both UP and DOWN pressed, don't move vertically (dy stays 0)
+                
+                # Handle horizontal movement (prioritize if both pressed)
+                if pygame.K_LEFT in self.keys_pressed and pygame.K_RIGHT not in self.keys_pressed:
                     dx -= 1
-                if pygame.K_RIGHT in self.keys_pressed:
+                elif pygame.K_RIGHT in self.keys_pressed and pygame.K_LEFT not in self.keys_pressed:
                     dx += 1
+                # If both LEFT and RIGHT pressed, don't move horizontally (dx stays 0)
                 
                 self.maze2.player.move(dx, dy, self.maze2.walls)
     
@@ -1922,22 +2118,36 @@ class Game:
         
         self.screen.blit(subtitle, subtitle_rect)
         
-        # Server button
-        server_rect = pygame.Rect(450, 350, 250, 80)
+        # Three buttons side by side
+        button_width = 250
+        button_height = 80
+        button_spacing = 60
+        total_width = (button_width * 3) + (button_spacing * 2)
+        start_x = (SCREEN_WIDTH - total_width) // 2
+        button_y = 350
+        
+        # Server button (left)
+        server_rect = pygame.Rect(start_x, button_y, button_width, button_height)
         server_hover = server_rect.collidepoint(self.mouse_pos)
         draw_button(self.screen, server_rect, "HOST SERVER", self.font, server_hover, "🖥")
-        
         hint = self.font.render("Press 1 or Click", True, COLORS['ui_text_dim'])
-        hint_rect = hint.get_rect(center=(575, 450))
+        hint_rect = hint.get_rect(center=(server_rect.centerx, button_y + button_height + 20))
         self.screen.blit(hint, hint_rect)
         
-        # Client button
-        client_rect = pygame.Rect(900, 350, 250, 80)
+        # Solo button (middle)
+        solo_rect = pygame.Rect(start_x + button_width + button_spacing, button_y, button_width, button_height)
+        solo_hover = solo_rect.collidepoint(self.mouse_pos)
+        draw_button(self.screen, solo_rect, "SOLO PLAY", self.font, solo_hover, "👤")
+        hint = self.font.render("Press 2 or Click", True, COLORS['ui_text_dim'])
+        hint_rect = hint.get_rect(center=(solo_rect.centerx, button_y + button_height + 20))
+        self.screen.blit(hint, hint_rect)
+        
+        # Client button (right)
+        client_rect = pygame.Rect(start_x + (button_width + button_spacing) * 2, button_y, button_width, button_height)
         client_hover = client_rect.collidepoint(self.mouse_pos)
         draw_button(self.screen, client_rect, "JOIN GAME", self.font, client_hover, "🎮")
-        
-        hint = self.font.render("Press 2 or Click", True, COLORS['ui_text_dim'])
-        hint_rect = hint.get_rect(center=(1025, 450))
+        hint = self.font.render("Press 3 or Click", True, COLORS['ui_text_dim'])
+        hint_rect = hint.get_rect(center=(client_rect.centerx, button_y + button_height + 20))
         self.screen.blit(hint, hint_rect)
         
         # Instructions panel
@@ -2125,18 +2335,26 @@ class Game:
         maze_width = len(LEVELS[0][0]) * TILE_SIZE
         maze_height = len(LEVELS[0]) * TILE_SIZE
         
-        # Calculate centered positions for both mazes
-        total_width = maze_width * 2 + MAZE_GAP
-        left_margin = (SCREEN_WIDTH - total_width) // 2
-        
-        if self.maze1:
-            self.maze1.draw(self.screen, left_margin)
-            self._draw_info_bar(self.maze1, left_margin, maze_height + 20, "PLAYER 1", COLORS['yellow'])
-        
-        if self.maze2:
-            offset_x = left_margin + maze_width + MAZE_GAP
-            self.maze2.draw(self.screen, offset_x)
-            self._draw_info_bar(self.maze2, offset_x, maze_height + 20, "PLAYER 2", COLORS['green'])
+        if self.is_solo:
+            # Solo mode - center single maze on screen
+            center_offset = (SCREEN_WIDTH - maze_width) // 2
+            
+            if self.maze1:
+                self.maze1.draw(self.screen, center_offset)
+                self._draw_info_bar(self.maze1, center_offset, maze_height + 20, "PLAYER", self.player1_color)
+        else:
+            # Multiplayer mode - show both mazes side by side
+            total_width = maze_width * 2 + MAZE_GAP
+            left_margin = (SCREEN_WIDTH - total_width) // 2
+            
+            if self.maze1:
+                self.maze1.draw(self.screen, left_margin)
+                self._draw_info_bar(self.maze1, left_margin, maze_height + 20, "PLAYER 1", COLORS['yellow'])
+            
+            if self.maze2:
+                offset_x = left_margin + maze_width + MAZE_GAP
+                self.maze2.draw(self.screen, offset_x)
+                self._draw_info_bar(self.maze2, offset_x, maze_height + 20, "PLAYER 2", COLORS['green'])
         
         # Level indicator with style
         level_panel = pygame.Rect(SCREEN_WIDTH // 2 - 150, 10, 300, 60)
