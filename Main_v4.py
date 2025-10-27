@@ -17,10 +17,11 @@ from typing import List, Tuple, Optional
 class GameState(Enum):
     MODE_SELECT = 0
     LOGIN = 1
-    INTRO = 2
-    PLAYING = 3
-    LEVEL_COMPLETE = 4
-    GAME_OVER = 5
+    PLAYER_SELECT = 2
+    INTRO = 3
+    PLAYING = 4
+    LEVEL_COMPLETE = 5
+    GAME_OVER = 6
 
 class Direction(Enum):
     UP = (0, -1)
@@ -99,6 +100,16 @@ COLORS = {
     'gradient_bottom': (15, 15, 25),
 }
 
+# Player Selection Options
+PLAYER_OPTIONS = [
+    {"name": "Knight", "color": (255, 255, 0), "desc": "Balanced warrior"},
+    {"name": "Rogue", "color": (128, 0, 128), "desc": "Fast and agile"},
+    {"name": "Warrior", "color": (220, 50, 50), "desc": "High damage dealer"},
+    {"name": "Paladin", "color": (255, 215, 0), "desc": "Tank with defense"},
+    {"name": "Ranger", "color": (50, 220, 50), "desc": "Quick attacker"},
+    {"name": "Mage", "color": (100, 150, 255), "desc": "Magical powers"},
+]
+
 # ============================================================================
 # LEVEL MAPS
 # ============================================================================
@@ -132,15 +143,15 @@ LEVELS = [
         "#.#####.####.#####.#",
         "#.....#.#..#.#.....#",
         "####..#.#..#.#..####",
-        "#..B..G.####.G..B..#",
+        "#..#..G.####.G..#..#",
         "#..#############...#",
         "#..............#...#",
         "#..############....#",
-        "#..B........E.G....#",
+        "#..#........E.#....#",
         "#..#.##########....#",
         "#..#.#........#....#",
         "#..#.#.H####K.#....#",
-        "#....B........#....#",
+        "#....#........#....#",
         "######.########....#",
         "#..................#",
         "#.................L#",
@@ -214,20 +225,20 @@ LEVELS = [
         "####################",
         "#P.E...............#",
         "#.################.#",
-        "#................E.#",
+        "#................#.#",
         "#################..#",
         "#.E...............##",
         "#.################.#",
-        "#................G.#",
+        "#................#.#",
         "#################..#",
         "#.E...........G...##",
         "#.################.#",
-        "#........H.......E.#",
+        "#........H.......#.#",
         "#################..#",
         "#.E.............K.##",
         "#.################.#",
         "#................#.#",
-        "#.E..............HL#",
+        "#.E..............#L#",
         "####################"
     ],
     # Level 7 - Treasure Chamber
@@ -329,7 +340,7 @@ LEVELS = [
         "#.#.#....#....#....##",
         "#.#.#.########.####.#",
         "#.#.#.#......#.#....#",
-        "#...H.#.GKHG.#.#....#",
+        "#...#.#.GKHG.#.#....#",
         "#####.#......#.#.####",
         "#.....########.....E#",
         "#..................L#",
@@ -341,19 +352,19 @@ LEVELS = [
         "#P.......##........#",
         "#.#####..##..#####.#",
         "#.#...#..##..#...#.#",
-        "#B#.#.#..##..#.#.#.#",
+        "#.#.#.#..##..#.#.#.#",
         "#.#.#.#......#.#.#.#",
         "#.#.#.########.#.#.#",
         "#.#.#..........#.#.#",
         "#.#.#.#EEGKHE#.#.#.#",
-        "#E#.#..........#.#.#",
+        "#.#.#..........#.#.#",
         "#.#.#.########.#.#.#",
         "#.#.#.#......#.#.#.#",
         "#.#.#.#..##..#.#.#.#",
-        "#G#...#..##..#...#.#",
+        "#.#...#..##..#...#.#",
         "#.#####..##..#####.#",
         "#........##........#",
-        "#..................L",
+        "#..................L#",
         "####################"
     ],
     # Level 13 - Checkered Chaos
@@ -361,20 +372,20 @@ LEVELS = [
         "####################",
         "#P.#.#.#.#.#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
-        "#E.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
-        "#H.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
-        "#B.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
         "#.#.#.#EEGKHE#.#.#.#",
-        "#G.#.#.#.#.#.#.#.#.#",
-        "#.E.#.#.#.#.#.#.#.##",
-        "##.H.#.#.#.#.#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
-        "##.G.#.#.#.#.#.#.#.#",
+        "##.#.#.#.#.#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
-        "##.H.#.#.#.#.#.#.#E#",
-        "#..................L",
+        "##.#.#.#.#.#.#.#.#.#",
+        "#.#.#.#.#.#.#.#.#.##",
+        "##.#.#.#.#.#.#.#.#E#",
+        "#..................L#",
         "####################"
     ],
     # Level 14 - The Labyrinth
@@ -395,7 +406,7 @@ LEVELS = [
         "#.#.#.........#.#.##",
         "#.#.###########.#.##",
         "#.#.............#E.#",
-        "#.E.............#.L#",
+        "#.#.............#.L#",
         "####################"
     ],
     # Level 15 - Fortress Interior
@@ -937,11 +948,15 @@ class Wall(Entity):
         pygame.draw.rect(surface, COLORS['black'], draw_rect, 2)
 
 class Player(Entity):
-    def __init__(self, x: float, y: float, player_id: int):
+    def __init__(self, x: float, y: float, player_id: int, color: tuple = None):
         size = TILE_SIZE - 8
         super().__init__(x, y, size, size)
         self.player_id = player_id
-        self.color = COLORS['yellow'] if player_id == 1 else COLORS['green']
+        # Use custom color if provided, otherwise use default based on player_id
+        if color is not None:
+            self.color = color
+        else:
+            self.color = COLORS['yellow'] if player_id == 1 else COLORS['green']
         self.health = PLAYER_HEALTH
         self.max_health = PLAYER_HEALTH
         self.score = 0
@@ -1228,8 +1243,9 @@ class Collectible(Entity):
 # ============================================================================
 
 class MazeState:
-    def __init__(self, player_id: int, level_map: List[str]):
+    def __init__(self, player_id: int, level_map: List[str], player_color: tuple = None):
         self.player_id = player_id
+        self.player_color = player_color  # Store the custom color
         self.player: Optional[Player] = None
         self.enemies: List[Enemy] = []
         self.collectibles: List[Collectible] = []
@@ -1255,8 +1271,9 @@ class MazeState:
                 elif tile == 'B':
                     self.walls.append(Wall(x, y, True))
                 elif tile == 'P':
+                    # Pass the custom color to the player
                     self.player = Player(x + TILE_SIZE // 2, y + TILE_SIZE // 2, 
-                                        self.player_id)
+                                        self.player_id, self.player_color)
                 elif tile == 'E':
                     self.enemies.append(Enemy(x + TILE_SIZE // 2, y + TILE_SIZE // 2))
                 elif tile in ['G', 'H', 'K']:
@@ -1406,6 +1423,11 @@ class Game:
         self.password = ""
         self.active_field = "username"
         self.error_message = ""
+        
+        # Player selection
+        self.selected_player_index = 0  # Default to first player (Knight)
+        self.player1_color = PLAYER_OPTIONS[0]["color"]  # Default yellow (Knight)
+        self.player2_color = PLAYER_OPTIONS[0]["color"]  # Default yellow (Knight)
         
         self.keys_pressed = set()
         self.mouse_pos = (0, 0)
@@ -1593,19 +1615,19 @@ class Game:
         
         if state.get('maze1'):
             if not self.maze1:
-                self.maze1 = MazeState(1, LEVELS[self.current_level])
+                self.maze1 = MazeState(1, LEVELS[self.current_level], self.player1_color)
             self.maze1.set_state(state['maze1'])
         
         if state.get('maze2'):
             if not self.maze2:
-                self.maze2 = MazeState(2, LEVELS[self.current_level])
+                self.maze2 = MazeState(2, LEVELS[self.current_level], self.player2_color)
             self.maze2.set_state(state['maze2'])
     
     def start_game(self):
         self.state = GameState.PLAYING
         self.current_level = 0
-        self.maze1 = MazeState(1, LEVELS[0])
-        self.maze2 = MazeState(2, LEVELS[0])
+        self.maze1 = MazeState(1, LEVELS[0], self.player1_color)
+        self.maze2 = MazeState(2, LEVELS[0], self.player2_color)
         self.play_level_music(1)  # Play level 1 music
     
     def advance_level(self):
@@ -1623,8 +1645,8 @@ class Game:
         p2_score = self.maze2.player.score if self.maze2 and self.maze2.player else 0
         p2_keys = self.maze2.player.keys if self.maze2 and self.maze2.player else 0
         
-        self.maze1 = MazeState(1, LEVELS[self.current_level])
-        self.maze2 = MazeState(2, LEVELS[self.current_level])
+        self.maze1 = MazeState(1, LEVELS[self.current_level], self.player1_color)
+        self.maze2 = MazeState(2, LEVELS[self.current_level], self.player2_color)
         
         if self.maze1.player:
             self.maze1.player.health = p1_health
@@ -1666,7 +1688,24 @@ class Game:
                 elif self.state == GameState.LOGIN:
                     self._handle_login_input(event)
                 
+                elif self.state == GameState.PLAYER_SELECT:
+                    if event.key == pygame.K_LEFT:
+                        self.selected_player_index = (self.selected_player_index - 1) % len(PLAYER_OPTIONS)
+                    elif event.key == pygame.K_RIGHT:
+                        self.selected_player_index = (self.selected_player_index + 1) % len(PLAYER_OPTIONS)
+                    elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                        # Confirm selection and start game
+                        self._confirm_player_selection()
+                    elif event.key == pygame.K_ESCAPE:
+                        self.state = GameState.LOGIN
+                        self.play_login_music()
+                
                 elif self.state == GameState.PLAYING:
+                    if event.key == pygame.K_ESCAPE:
+                        self.state = GameState.MODE_SELECT
+                        self.play_intro_music()  # Play intro music when returning to menu
+                
+                elif self.state == GameState.GAME_OVER:
                     if event.key == pygame.K_ESCAPE:
                         self.state = GameState.MODE_SELECT
                         self.play_intro_music()  # Play intro music when returning to menu
@@ -1682,6 +1721,8 @@ class Game:
                     self._handle_mode_select_click(event.pos)
                 elif self.state == GameState.LOGIN:
                     self._handle_login_click(event.pos)
+                elif self.state == GameState.PLAYER_SELECT:
+                    self._handle_player_select_click(event.pos)
     
     def _handle_login_input(self, event):
         if self.active_field == "username":
@@ -1731,14 +1772,55 @@ class Game:
     def _attempt_login(self):
         if self.username == "user" and self.password == "pass":
             self.error_message = ""
-            if self.is_server:
-                self.start_game()
-            else:
-                self.connect_to_server("127.0.0.1")
-                if self.is_connected:
-                    self.state = GameState.PLAYING
+            # Go to player selection screen after successful login
+            self.state = GameState.PLAYER_SELECT
+            self.stop_music()  # Stop login music before player select
         else:
-            self.error_message = "Invalid credentials"
+            self.error_message = "Invalid username or password"
+    
+    def _handle_player_select_click(self, pos):
+        # Calculate player card positions
+        card_width = 220
+        card_height = 280
+        spacing = 30
+        total_width = (card_width * 3) + (spacing * 2)
+        start_x = (SCREEN_WIDTH - total_width) // 2
+        start_y = 250
+        
+        # Check top row (3 players)
+        for i in range(3):
+            card_x = start_x + i * (card_width + spacing)
+            card_rect = pygame.Rect(card_x, start_y, card_width, card_height)
+            if card_rect.collidepoint(pos):
+                self.selected_player_index = i
+                return
+        
+        # Check bottom row (3 players)
+        start_y_bottom = start_y + card_height + 40
+        for i in range(3):
+            card_x = start_x + i * (card_width + spacing)
+            card_rect = pygame.Rect(card_x, start_y_bottom, card_width, card_height)
+            if card_rect.collidepoint(pos):
+                self.selected_player_index = i + 3
+                return
+        
+        # Check confirm button
+        confirm_rect = pygame.Rect(650, 780, 300, 60)
+        if confirm_rect.collidepoint(pos):
+            self._confirm_player_selection()
+    
+    def _confirm_player_selection(self):
+        """Confirm player selection and start the game"""
+        selected_player = PLAYER_OPTIONS[self.selected_player_index]
+        
+        if self.is_server:
+            self.player1_color = selected_player["color"]
+            self.start_game()
+        else:
+            self.player2_color = selected_player["color"]
+            self.connect_to_server("127.0.0.1")
+            if self.is_connected:
+                self.state = GameState.PLAYING
     
     def update(self):
         if self.state == GameState.PLAYING and self.is_server:
@@ -1803,6 +1885,8 @@ class Game:
             self._draw_mode_select()
         elif self.state == GameState.LOGIN:
             self._draw_login()
+        elif self.state == GameState.PLAYER_SELECT:
+            self._draw_player_select()
         elif self.state == GameState.PLAYING:
             self._draw_game()
         elif self.state == GameState.LEVEL_COMPLETE:
@@ -1941,6 +2025,99 @@ class Game:
             text = self.font.render(status_text, True, status_color)
             text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 740))
             self.screen.blit(text, text_rect)
+    
+    def _draw_player_select(self):
+        # Gradient background
+        draw_gradient_rect(self.screen, pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT),
+                          COLORS['gradient_top'], COLORS['gradient_bottom'])
+        
+        # Title
+        title = self.title_font.render("SELECT YOUR CHARACTER", True, COLORS['gold'])
+        title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 80))
+        self.screen.blit(title, title_rect)
+        
+        # Subtitle
+        subtitle = self.font.render("Use Arrow Keys or Click to Choose", True, COLORS['ui_text'])
+        subtitle_rect = subtitle.get_rect(center=(SCREEN_WIDTH // 2, 150))
+        self.screen.blit(subtitle, subtitle_rect)
+        
+        # Draw player cards in 2 rows of 3
+        card_width = 220
+        card_height = 280
+        spacing = 30
+        total_width = (card_width * 3) + (spacing * 2)
+        start_x = (SCREEN_WIDTH - total_width) // 2
+        start_y = 250
+        
+        for i, player in enumerate(PLAYER_OPTIONS):
+            # Calculate position (2 rows, 3 columns)
+            row = i // 3
+            col = i % 3
+            card_x = start_x + col * (card_width + spacing)
+            card_y = start_y + row * (card_height + 40)
+            
+            # Check if this is the selected player
+            is_selected = (i == self.selected_player_index)
+            
+            # Card background with glow effect for selected
+            card_rect = pygame.Rect(card_x, card_y, card_width, card_height)
+            
+            if is_selected:
+                # Animated glow for selected
+                glow_size = int(math.sin(pygame.time.get_ticks() / 200) * 5 + 10)
+                glow_rect = card_rect.inflate(glow_size, glow_size)
+                draw_rounded_rect(self.screen, glow_rect, COLORS['gold'], radius=15)
+            
+            # Card border
+            border_color = COLORS['gold'] if is_selected else COLORS['ui_border']
+            border_width = 4 if is_selected else 2
+            draw_rounded_rect(self.screen, card_rect, COLORS['ui_panel'], radius=12,
+                            border_color=border_color, border_width=border_width)
+            
+            # Player preview (circle with color)
+            preview_radius = 60
+            preview_center = (card_x + card_width // 2, card_y + 80)
+            pygame.draw.circle(self.screen, player["color"], preview_center, preview_radius)
+            pygame.draw.circle(self.screen, COLORS['white'], preview_center, preview_radius, 3)
+            
+            # Player name
+            name_font = pygame.font.Font(None, 36)
+            name_text = name_font.render(player["name"], True, COLORS['white'])
+            name_rect = name_text.get_rect(center=(card_x + card_width // 2, card_y + 170))
+            self.screen.blit(name_text, name_rect)
+            
+            # Player description
+            desc_text = self.font.render(player["desc"], True, COLORS['ui_text_dim'])
+            desc_rect = desc_text.get_rect(center=(card_x + card_width // 2, card_y + 210))
+            self.screen.blit(desc_text, desc_rect)
+            
+            # Selected indicator
+            if is_selected:
+                indicator_text = self.subtitle_font.render("✓ SELECTED", True, COLORS['gold'])
+                indicator_rect = indicator_text.get_rect(center=(card_x + card_width // 2, card_y + 250))
+                self.screen.blit(indicator_text, indicator_rect)
+        
+        # Confirm button
+        confirm_rect = pygame.Rect(650, 780, 300, 60)
+        hover = confirm_rect.collidepoint(self.mouse_pos)
+        button_color = COLORS['ui_hover'] if hover else COLORS['ui_accent']
+        draw_rounded_rect(self.screen, confirm_rect, button_color, radius=10,
+                         border_color=COLORS['gold'], border_width=3)
+        
+        confirm_text = self.subtitle_font.render("START GAME", True, COLORS['white'])
+        confirm_text_rect = confirm_text.get_rect(center=confirm_rect.center)
+        self.screen.blit(confirm_text, confirm_text_rect)
+        
+        # Instructions
+        instructions = self.font.render("Press ENTER/SPACE or click START GAME to continue", 
+                                       True, COLORS['ui_text_dim'])
+        instructions_rect = instructions.get_rect(center=(SCREEN_WIDTH // 2, 860))
+        self.screen.blit(instructions, instructions_rect)
+        
+        # ESC instruction
+        esc_text = self.font.render("Press ESC to go back", True, COLORS['ui_text_dim'])
+        esc_rect = esc_text.get_rect(center=(SCREEN_WIDTH // 2, 885))
+        self.screen.blit(esc_text, esc_rect)
     
     def _draw_game(self):
         self.screen.fill(COLORS['ui_bg'])
