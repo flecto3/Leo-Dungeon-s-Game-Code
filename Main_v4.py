@@ -1107,6 +1107,14 @@ class Player(Entity):
         self.facing = Direction(tuple(state['facing']))
 
 class Enemy(Entity):
+    # Ghost color options (like Pac-Man ghosts: Blinky, Pinky, Inky, Clyde)
+    GHOST_COLORS = [
+        (255, 0, 0),      # Red (Blinky)
+        (255, 184, 255),  # Pink (Pinky)
+        (0, 255, 255),    # Cyan (Inky)
+        (255, 184, 82),   # Orange (Clyde)
+    ]
+    
     def __init__(self, x: float, y: float):
         size = TILE_SIZE - 8
         super().__init__(x, y, size, size)
@@ -1117,6 +1125,8 @@ class Enemy(Entity):
         self.patrol_target = Position(x, y)
         self.last_attack_time = 0
         self.next_patrol_time = pygame.time.get_ticks()
+        # Assign random ghost color
+        self.base_color = random.choice(self.GHOST_COLORS)
     
     def update(self, player: Player, walls: List[Wall]):
         dist = self.pos.distance_to(player.pos)
@@ -1179,10 +1189,68 @@ class Enemy(Entity):
         draw_rect = self.rect.copy()
         draw_rect.x += offset_x
         
-        color = COLORS['red'] if self.state == 'chase' else COLORS['orange']
-        pygame.draw.rect(surface, color, draw_rect)
-        pygame.draw.rect(surface, COLORS['black'], draw_rect, 2)
+        # Ghost color based on state - use base color, brighten when chasing
+        if self.state == 'chase':
+            # Brighten the color when chasing (add white)
+            color = tuple(min(255, c + 50) for c in self.base_color)
+        else:
+            color = self.base_color
         
+        # Draw ghost body with rounded top and wavy bottom
+        # Top half - rounded
+        top_rect = pygame.Rect(draw_rect.x, draw_rect.y, draw_rect.width, draw_rect.height // 2)
+        pygame.draw.rect(surface, color, top_rect, border_top_left_radius=draw_rect.width // 2,
+                        border_top_right_radius=draw_rect.width // 2)
+        
+        # Bottom half - main body
+        bottom_rect = pygame.Rect(draw_rect.x, draw_rect.y + draw_rect.height // 2, 
+                                  draw_rect.width, draw_rect.height // 2)
+        pygame.draw.rect(surface, color, bottom_rect)
+        
+        # Wavy bottom (ghost tail) - draw small half-circles
+        wave_width = draw_rect.width // 3
+        for i in range(3):
+            wave_x = draw_rect.x + i * wave_width + wave_width // 2
+            wave_y = draw_rect.bottom - wave_width // 2
+            pygame.draw.circle(surface, color, (wave_x, wave_y), wave_width // 2)
+        
+        # Cover the bottom with background color to create wave effect
+        wave_cover_rect = pygame.Rect(draw_rect.x, draw_rect.bottom - 2, draw_rect.width, 3)
+        pygame.draw.rect(surface, COLORS['floor'], wave_cover_rect)
+        
+        # Draw eyes
+        eye_radius = draw_rect.width // 6
+        left_eye_x = draw_rect.x + draw_rect.width // 3
+        right_eye_x = draw_rect.x + 2 * draw_rect.width // 3
+        eye_y = draw_rect.y + draw_rect.height // 3
+        
+        # White part of eyes
+        pygame.draw.circle(surface, COLORS['white'], (left_eye_x, eye_y), eye_radius)
+        pygame.draw.circle(surface, COLORS['white'], (right_eye_x, eye_y), eye_radius)
+        
+        # Pupils (look in movement direction)
+        pupil_radius = eye_radius // 2
+        pupil_offset = 2
+        
+        # Determine pupil position based on patrol target or chase
+        pupil_dx, pupil_dy = 0, 0
+        if self.state == 'chase':
+            # Pupils look forward
+            pupil_dy = pupil_offset
+        else:
+            # Pupils look in patrol direction
+            if hasattr(self, 'patrol_target'):
+                if self.patrol_target.x > self.pos.x:
+                    pupil_dx = pupil_offset
+                elif self.patrol_target.x < self.pos.x:
+                    pupil_dx = -pupil_offset
+        
+        pygame.draw.circle(surface, COLORS['blue'], 
+                          (left_eye_x + pupil_dx, eye_y + pupil_dy), pupil_radius)
+        pygame.draw.circle(surface, COLORS['blue'], 
+                          (right_eye_x + pupil_dx, eye_y + pupil_dy), pupil_radius)
+        
+        # Health bar if damaged
         if self.health < self.max_health:
             bar_width = self.width
             bar_height = 4
@@ -1201,7 +1269,8 @@ class Enemy(Entity):
             'health': self.health,
             'state': self.state,
             'patrol_x': self.patrol_target.x,
-            'patrol_y': self.patrol_target.y
+            'patrol_y': self.patrol_target.y,
+            'base_color': self.base_color
         })
         return state
     
@@ -1210,6 +1279,11 @@ class Enemy(Entity):
         self.health = state['health']
         self.state = state['state']
         self.patrol_target = Position(state['patrol_x'], state['patrol_y'])
+        # Restore base color if available, otherwise use random
+        if 'base_color' in state:
+            self.base_color = tuple(state['base_color'])
+        else:
+            self.base_color = random.choice(self.GHOST_COLORS)
 
 class Boss(Enemy):
     """Boss enemy - larger, stronger, and more aggressive"""
