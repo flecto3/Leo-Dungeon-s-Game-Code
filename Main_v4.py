@@ -22,6 +22,7 @@ class GameState(Enum):
     PLAYING = 4
     LEVEL_COMPLETE = 5
     GAME_OVER = 6
+    VICTORY = 7  # New state for winning all levels
 
 class Direction(Enum):
     UP = (0, -1)
@@ -272,7 +273,7 @@ LEVELS = [
         "##.#.#########.#..##",
         "##.#.#.......#.#..##",
         "##.#.#.#####.#.#..##",
-        "##.#.#.#EGK#.#.#..##",
+        "##.G.H.BEGK#.#.#..##",
         "##.#.#.#####.#.#..##",
         "##.#.#.......#.#..##",
         "##.#.#########.#..##",
@@ -378,13 +379,13 @@ LEVELS = [
         "#.#.#.#.#.#.#.#.#.##",
         "##.#.#.#.#.#.#.#.#.#",
         "#.#.#.#EEGKHE#.#.#.#",
-        "##.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#...#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
-        "##.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#...#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
-        "##.#.#.#.#.#.#.#.#.#",
+        "##.#.#.#...#.#.#.#.#",
         "#.#.#.#.#.#.#.#.#.##",
-        "##.#.#.#.#.#.#.#.#E#",
+        "##.#.#.#...#.#.#.#E#",
         "#..................L",
         "####################"
     ],
@@ -393,7 +394,7 @@ LEVELS = [
         "####################",
         "#P.#...#.......#...#",
         "#.###.###.###.###.##",
-        "#.....#.....#.....##",
+        "#...H.#.....#.....##",
         "#####.#.###.#.#####H",
         "#.....#.#...#.....##",
         "#.#####.#.#######.##",
@@ -469,7 +470,7 @@ LEVELS = [
         "#################.##",
         "#.................##",
         "##.#################",
-        "##................L#",
+        "##.....HG.........L#",
         "####################"
     ],
     # Level 18 - Prison Blocks
@@ -607,8 +608,8 @@ LEVELS = [
         "#.#....#.#.#....#.##",
         "#.#.####.#.####.#.##",
         "#.#.#....#....#.#.##",
-        "#.#.#.#######.#.#.##",
-        "#.#.#.#.....#.#.#.##",
+        "#H#.#.#######.#.#.##",
+        "#H#.#.#.....#.#.#.##",
         "#.#.#.#.###.#.#.#.##",
         "#.#.#.#.#E#.#.#.#.##",
         "#.#.#.#.###.#.#.#.##",
@@ -665,19 +666,19 @@ LEVELS = [
     [
         "####################",
         "#P#################.",
-        "#E................##",
+        "#E....HH..........##",
         "###.##############.#",
-        "###E..............##",
+        "###E...H..........##",
         "#####.############.#",
-        "#####E............##",
+        "#####E...GH.......##",
         "#######.##########.#",
-        "#######E..........##",
+        "#######E..H.......##",
         "#########.########.#",
-        "#########E........##",
+        "#########E...B....##",
         "###########.######.#",
         "###########.#GKHE#.#",
         "###########.######.#",
-        "###########E......##",
+        "###########E.GH...##",
         "#############.####.#",
         "#############E....L#",
         "####################"
@@ -967,6 +968,7 @@ class Player(Entity):
         self.last_attack_time = 0
         self.mouth_open = True
         self.anim_timer = 0
+        self.health_potions = 0  # Inventory for stored health potions
     
     def move(self, dx: int, dy: int, walls: List[Wall]):
         # Only update direction/facing for cardinal directions (not diagonals)
@@ -1044,6 +1046,15 @@ class Player(Entity):
         if self.health > self.max_health:
             self.health = self.max_health
     
+    def use_health_potion(self) -> bool:
+        """Use a health potion from inventory. Returns True if used successfully."""
+        if self.health_potions > 0 and self.health < self.max_health:
+            # Use a potion
+            self.health_potions -= 1
+            self.heal(HEALTH_POTION_HEAL)
+            return True
+        return False
+    
     def draw(self, surface: pygame.Surface, offset_x: int = 0):
         center = (int(self.pos.x + offset_x), int(self.pos.y))
         radius = self.width // 2
@@ -1095,7 +1106,8 @@ class Player(Entity):
             'score': self.score,
             'keys': self.keys,
             'player_id': self.player_id,
-            'facing': self.facing.value
+            'facing': self.facing.value,
+            'health_potions': self.health_potions
         })
         return state
     
@@ -1105,6 +1117,7 @@ class Player(Entity):
         self.score = state['score']
         self.keys = state['keys']
         self.facing = Direction(tuple(state['facing']))
+        self.health_potions = state.get('health_potions', 0)  # Default to 0 if not present
 
 class Enemy(Entity):
     # Ghost color options (like Pac-Man ghosts: Blinky, Pinky, Inky, Clyde)
@@ -1521,7 +1534,13 @@ class MazeState:
                 if collectible.item_type == 'G':
                     self.player.score += GOLD_VALUE
                 elif collectible.item_type == 'H':
-                    self.player.heal(HEALTH_POTION_HEAL)
+                    # Health potion logic
+                    if self.player.health >= self.player.max_health:
+                        # At full health - store the potion in inventory
+                        self.player.health_potions += 1
+                    else:
+                        # Not at full health - use it immediately
+                        self.player.heal(HEALTH_POTION_HEAL)
                 elif collectible.item_type == 'K':
                     self.player.keys += 1
                 self.collectibles.remove(collectible)
@@ -1702,6 +1721,10 @@ class Game:
         """Play the game over screen music"""
         self.play_music("game_over_music.mp3")
     
+    def play_victory_music(self):
+        """Play the victory screen music"""
+        self.play_music("victory_music.mp3")
+    
     def play_level_music(self, level_number: int):
         """Play music for a specific level"""
         music_name = f"level_{level_number}_music.mp3"
@@ -1857,8 +1880,9 @@ class Game:
     def advance_level(self):
         self.current_level += 1
         if self.current_level >= len(LEVELS):
-            self.state = GameState.GAME_OVER
-            self.play_game_over_music()  # Play game over music
+            # Player won! All levels completed!
+            self.state = GameState.VICTORY
+            self.play_victory_music()  # Play victory music
             return
         
         p1_health = self.maze1.player.health if self.maze1 and self.maze1.player else PLAYER_HEALTH
@@ -1940,8 +1964,52 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         self.state = GameState.MODE_SELECT
                         self.play_intro_music()  # Play intro music when returning to menu
+                    elif event.key == pygame.K_1 or event.key == pygame.K_KP1:
+                        # Use health potion from inventory (works with both '1' and numpad '1')
+                        print(f"[DEBUG] '1' key pressed! Is server/solo: {self.is_server or self.is_solo}")
+                        if (self.is_server or self.is_solo) and self.maze1 and self.maze1.player:
+                            print(f"[DEBUG] Player 1 - Potions: {self.maze1.player.health_potions}, Health: {self.maze1.player.health}/{self.maze1.player.max_health}")
+                            if self.maze1.player.use_health_potion():
+                                print(f"[DEBUG] Potion used! New health: {self.maze1.player.health}")
+                                # Create healing particles
+                                for _ in range(12):
+                                    angle = random.uniform(0, 2 * math.pi)
+                                    speed = random.uniform(2, 6)
+                                    self.maze1.particles.append(Particle(
+                                        self.maze1.player.pos.x,
+                                        self.maze1.player.pos.y,
+                                        math.cos(angle) * speed,
+                                        math.sin(angle) * speed,
+                                        COLORS['green'],
+                                        40, 4
+                                    ))
+                            else:
+                                print(f"[DEBUG] Could not use potion - either no potions or at full health")
+                        elif not self.is_server and not self.is_solo and self.maze2 and self.maze2.player:
+                            print(f"[DEBUG] Player 2 - Potions: {self.maze2.player.health_potions}, Health: {self.maze2.player.health}/{self.maze2.player.max_health}")
+                            if self.maze2.player.use_health_potion():
+                                print(f"[DEBUG] Potion used! New health: {self.maze2.player.health}")
+                                # Create healing particles
+                                for _ in range(12):
+                                    angle = random.uniform(0, 2 * math.pi)
+                                    speed = random.uniform(2, 6)
+                                    self.maze2.particles.append(Particle(
+                                        self.maze2.player.pos.x,
+                                        self.maze2.player.pos.y,
+                                        math.cos(angle) * speed,
+                                        math.sin(angle) * speed,
+                                        COLORS['green'],
+                                        40, 4
+                                    ))
+                            else:
+                                print(f"[DEBUG] Could not use potion - either no potions or at full health")
                 
                 elif self.state == GameState.GAME_OVER:
+                    if event.key == pygame.K_ESCAPE:
+                        self.state = GameState.MODE_SELECT
+                        self.play_intro_music()  # Play intro music when returning to menu
+                
+                elif self.state == GameState.VICTORY:
                     if event.key == pygame.K_ESCAPE:
                         self.state = GameState.MODE_SELECT
                         self.play_intro_music()  # Play intro music when returning to menu
@@ -2163,6 +2231,8 @@ class Game:
             self._draw_level_complete()
         elif self.state == GameState.GAME_OVER:
             self._draw_game_over()
+        elif self.state == GameState.VICTORY:
+            self._draw_victory()
         
         pygame.display.flip()
     
@@ -2492,6 +2562,16 @@ class Game:
         # Keys with icon
         keys_text = self.font.render(f"🔑 {maze.player.keys}", True, COLORS['gold'])
         self.screen.blit(keys_text, (x + 420, y + 45))
+        
+        # Health potions with icon (press 1 to use)
+        potion_color = COLORS['green'] if maze.player.health_potions > 0 else COLORS['ui_text_dim']
+        potions_text = self.font.render(f"🧪 {maze.player.health_potions}", True, potion_color)
+        self.screen.blit(potions_text, (x + 560, y + 45))
+        
+        # Hint text for using potions (only show if player has potions)
+        if maze.player.health_potions > 0:
+            hint_text = self.font.render("(Press 1)", True, COLORS['ui_text_dim'])
+            self.screen.blit(hint_text, (x + 640, y + 45))
     
     def _draw_level_complete(self):
         self._draw_game()
@@ -2592,6 +2672,103 @@ class Game:
                          border_color=COLORS['ui_border'], border_width=2)
         exit_text = self.font.render("Press ESC to return to menu", True, COLORS['ui_text_dim'])
         exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH // 2, 705))
+        self.screen.blit(exit_text, exit_rect)
+    
+    def _draw_victory(self):
+        # Gradient background (brighter/happier colors)
+        victory_top = (20, 50, 100)
+        victory_bottom = (50, 20, 80)
+        draw_gradient_rect(self.screen, pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT),
+                          victory_top, victory_bottom)
+        
+        # Determine winner
+        p1_score = self.maze1.player.score if self.maze1 and self.maze1.player else 0
+        p2_score = self.maze2.player.score if self.maze2 and self.maze2.player else 0
+        
+        if self.is_solo or not self.maze2:
+            # Solo mode - single player victory
+            winner = "YOU WIN!"
+            winner_color = COLORS['gold']
+            trophy = "👑"
+            show_p2 = False
+        elif p1_score > p2_score:
+            winner = "PLAYER 1 WINS!"
+            winner_color = COLORS['yellow']
+            trophy = "🏆"
+            show_p2 = True
+        elif p2_score > p1_score:
+            winner = "PLAYER 2 WINS!"
+            winner_color = COLORS['green']
+            trophy = "🏆"
+            show_p2 = True
+        else:
+            winner = "BOTH WIN!"
+            winner_color = COLORS['gold']
+            trophy = "🏆🏆"
+            show_p2 = True
+        
+        # Main panel
+        panel_rect = pygame.Rect(300, 150, 1000, 600)
+        draw_rounded_rect(self.screen, panel_rect, COLORS['ui_panel'], radius=20,
+                         border_color=COLORS['gold'], border_width=4)
+        
+        # Victory title with glow effect
+        for offset in [(3, 3), (-3, 3), (3, -3), (-3, -3)]:
+            glow = self.title_font.render("VICTORY!", True, (255, 215, 0, 150))
+            glow_rect = glow.get_rect(center=(SCREEN_WIDTH // 2 + offset[0], 220 + offset[1]))
+            self.screen.blit(glow, glow_rect)
+        
+        title = self.title_font.render("VICTORY!", True, COLORS['gold'])
+        title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 220))
+        self.screen.blit(title, title_rect)
+        
+        # Trophy/Crown with animation
+        pulse = math.sin(pygame.time.get_ticks() / 300) * 0.2 + 1.2
+        trophy_text = self.title_font.render(trophy, True, winner_color)
+        trophy_scaled = pygame.transform.scale(trophy_text,
+                                              (int(trophy_text.get_width() * pulse),
+                                               int(trophy_text.get_height() * pulse)))
+        trophy_rect = trophy_scaled.get_rect(center=(SCREEN_WIDTH // 2, 320))
+        self.screen.blit(trophy_scaled, trophy_rect)
+        
+        # Winner text
+        winner_text = self.title_font.render(winner, True, winner_color)
+        winner_rect = winner_text.get_rect(center=(SCREEN_WIDTH // 2, 420))
+        self.screen.blit(winner_text, winner_rect)
+        
+        # Congratulations message
+        congrats = self.subtitle_font.render("All 30 Levels Completed!", True, COLORS['ui_text'])
+        congrats_rect = congrats.get_rect(center=(SCREEN_WIDTH // 2, 480))
+        self.screen.blit(congrats, congrats_rect)
+        
+        # Score panel
+        score_height = 150 if show_p2 else 100
+        score_panel_rect = pygame.Rect(450, 520, 700, score_height)
+        draw_rounded_rect(self.screen, score_panel_rect, COLORS['ui_bg'], radius=15,
+                         border_color=COLORS['gold'], border_width=2)
+        
+        # Player scores
+        if show_p2:
+            p1_text = self.subtitle_font.render(f"Player 1: {p1_score} points", True, COLORS['yellow'])
+            p1_rect = p1_text.get_rect(center=(SCREEN_WIDTH // 2, 570))
+            self.screen.blit(p1_text, p1_rect)
+            
+            p2_text = self.subtitle_font.render(f"Player 2: {p2_score} points", True, COLORS['green'])
+            p2_rect = p2_text.get_rect(center=(SCREEN_WIDTH // 2, 620))
+            self.screen.blit(p2_text, p2_rect)
+        else:
+            # Solo mode - just show player score
+            score_text = self.subtitle_font.render(f"Final Score: {p1_score} points", True, COLORS['gold'])
+            score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, 570))
+            self.screen.blit(score_text, score_rect)
+        
+        # Exit instruction
+        exit_y = 690 if show_p2 else 650
+        exit_panel = pygame.Rect(550, exit_y, 500, 50)
+        draw_rounded_rect(self.screen, exit_panel, COLORS['ui_panel'], radius=10,
+                         border_color=COLORS['gold'], border_width=2)
+        exit_text = self.font.render("Press ESC to return to menu", True, COLORS['ui_text'])
+        exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH // 2, exit_y + 25))
         self.screen.blit(exit_text, exit_rect)
     
     def run(self):
